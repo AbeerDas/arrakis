@@ -13,7 +13,7 @@ import {
 } from "../actions";
 
 const textareaClass =
-  "border-input bg-background focus-visible:ring-ring w-full rounded-lg border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none";
+  "border-input bg-background focus-visible:ring-ring w-full resize-none rounded-lg border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none";
 
 const initial: SaveState = { ok: false };
 

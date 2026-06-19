@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { AppDemo } from "@/components/landing/app-demo";
 import { LetterReveal } from "@/components/landing/letter-reveal";
 import { Parallax } from "@/components/landing/parallax";
 import { Reveal } from "@/components/landing/reveal";
@@ -19,7 +20,7 @@ export default function LandingPage() {
         <img
           src="/desert.jpg"
           alt=""
-          className="absolute inset-0 h-full w-full object-cover object-[center_68%] opacity-[0.36]"
+          className="absolute inset-0 h-full w-full scale-[1.45] object-cover object-[center_72%] opacity-[0.38]"
         />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,var(--background)_0%,transparent_38%,transparent_62%,var(--background)_90%)]" />
         <div className="absolute inset-x-0 top-0 h-[135vh] bg-[radial-gradient(55%_40%_at_50%_6%,color-mix(in_oklch,var(--spice)_8%,transparent),transparent)]" />
@@ -66,9 +67,9 @@ export default function LandingPage() {
           </Reveal>
 
           {/* post-MVP app demo, peeking up from the bottom of the hero */}
-          <Reveal delayMs={940}>
+          <Reveal delayMs={940} variant="scale">
             <Parallax speed={0.04}>
-              <div className="relative mx-auto mt-36 max-w-5xl">
+              <div className="relative mx-auto mt-20 max-w-5xl">
                 <AppDemo />
                 {/* fade the bottom edge so it dissolves into the page */}
                 <div className="from-background pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t to-transparent" />
@@ -117,7 +118,7 @@ export default function LandingPage() {
         {/* --------------------------------------------------------- HOW IT WORKS */}
         <section id="how" className="py-32">
           <div className="mx-auto w-full max-w-5xl px-6">
-            <Reveal>
+            <Reveal variant="scale">
               <p className="text-spice text-center text-xs font-bold tracking-[0.28em] uppercase">
                 How it works
               </p>
@@ -127,7 +128,11 @@ export default function LandingPage() {
             </Reveal>
             <div className="mt-20 grid gap-12 sm:grid-cols-3">
               {STEPS.map((step, i) => (
-                <Reveal key={step.title} delayMs={i * 140}>
+                <Reveal
+                  key={step.title}
+                  delayMs={i * 140}
+                  variant={i === 0 ? "left" : i === 2 ? "right" : "up"}
+                >
                   <div className="flex flex-col">
                     <span className="text-spice/70 text-5xl font-black tabular-nums">
                       {String(i + 1).padStart(2, "0")}
@@ -147,7 +152,7 @@ export default function LandingPage() {
 
         {/* -------------------------------------------------------------- CTA */}
         <section className="mx-auto w-full max-w-5xl px-6 py-32">
-          <Reveal>
+          <Reveal variant="scale">
             <div className="glass relative overflow-hidden rounded-3xl px-8 py-20 text-center">
               {/* the same dunes, rising from the bottom and fading out upward */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -208,7 +213,7 @@ export default function LandingPage() {
 
 /* ---------------------------------------------------------------------------
    Feature row — eyebrow + title + body + a frosted preview card, alternating
-   sides. The card lifts on hover. Rich header, kept lean (no bullet clutter).
+   sides. Text and card slide in from opposite edges toward center on reveal.
 --------------------------------------------------------------------------- */
 function FeatureRow({
   eyebrow,
@@ -225,7 +230,10 @@ function FeatureRow({
 }) {
   return (
     <div className="grid items-center gap-10 md:grid-cols-2 md:gap-20">
-      <Reveal className={cn(reverse && "md:order-2")}>
+      <Reveal
+        className={cn(reverse && "md:order-2")}
+        variant={reverse ? "right" : "left"}
+      >
         <p className="text-spice text-xs font-bold tracking-[0.24em] uppercase">
           {eyebrow}
         </p>
@@ -236,11 +244,13 @@ function FeatureRow({
           {body}
         </p>
       </Reveal>
-      <Reveal className={cn(reverse && "md:order-1")} delayMs={120}>
+      <Reveal
+        className={cn(reverse && "md:order-1")}
+        delayMs={120}
+        variant={reverse ? "left" : "right"}
+      >
         <Parallax speed={0.06}>
-          <div className="glass rounded-2xl p-5 shadow-sm transition-[transform,box-shadow] duration-500 [transition-timing-function:var(--ease-dune)] hover:-translate-y-1.5 hover:shadow-xl">
-            {children}
-          </div>
+          <div className="glass rounded-2xl p-5 shadow-sm">{children}</div>
         </Parallax>
       </Reveal>
     </div>
@@ -250,7 +260,7 @@ function FeatureRow({
 const STEPS = [
   {
     title: "Discover",
-    body: "Scan companies added since your last visit, filtered to the roles and stages you care about.",
+    body: "New since your last visit, in the roles and stages you want.",
   },
   {
     title: "Reach",
@@ -263,100 +273,9 @@ const STEPS = [
 ];
 
 /* ---------------------------------------------------------------------------
-   Hero app demo — a Mac-style window showing the core loop: the startups list
-   on the left, a personalized cold email composed on the right.
---------------------------------------------------------------------------- */
-function AppDemo() {
-  const rows = [
-    { name: "Caladan Health", tag: "W24", selected: true },
-    { name: "Atreides Labs", tag: "W24" },
-    { name: "Spice Logistics", tag: "S24" },
-    { name: "Fremen Robotics", tag: "S24" },
-    { name: "Arrakis Data", tag: "W24" },
-  ];
-  return (
-    <div className="bg-card border-border/70 shadow-foreground/10 overflow-hidden rounded-2xl border text-left shadow-2xl">
-      {/* window chrome */}
-      <div className="border-border/60 bg-background/60 flex items-center gap-2 border-b px-4 py-3">
-        <span className="size-3 rounded-full bg-[#ff5f57]" />
-        <span className="size-3 rounded-full bg-[#febc2e]" />
-        <span className="size-3 rounded-full bg-[#28c840]" />
-        <span className="text-muted-foreground ml-3 text-xs font-medium">
-          Arrakis
-        </span>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-[1fr_1.35fr]">
-        {/* left: startups list */}
-        <div className="border-border/60 border-b p-4 sm:border-r sm:border-b-0">
-          <div className="flex items-baseline justify-between">
-            <span className="text-sm font-semibold">Startups</span>
-            <span className="text-muted-foreground text-xs">5,960</span>
-          </div>
-          <div className="bg-muted/70 text-muted-foreground mt-3 rounded-lg px-3 py-1.5 text-xs">
-            Search name, batch, industry
-          </div>
-          <div className="mt-2 space-y-0.5">
-            {rows.map((r) => (
-              <div
-                key={r.name}
-                className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-2 py-2",
-                  r.selected && "bg-accent",
-                )}
-              >
-                <span className="bg-foreground/10 flex size-7 shrink-0 items-center justify-center rounded-md text-xs font-medium">
-                  {r.name.charAt(0)}
-                </span>
-                <span className="flex-1 truncate text-sm font-medium">
-                  {r.name}
-                </span>
-                <span className="text-muted-foreground text-xs">{r.tag}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* right: cold outreach composer */}
-        <div className="p-5">
-          <p className="text-spice text-xs font-bold tracking-wider uppercase">
-            Cold outreach · Caladan Health
-          </p>
-          <p className="text-foreground mt-2.5 text-sm font-medium">
-            Subject: Saw Caladan just shipped real-time triage
-          </p>
-          <div className="text-muted-foreground mt-3 space-y-2 text-sm leading-relaxed">
-            <p>Hi Rodrigo,</p>
-            <p>
-              Saw Caladan shipped real-time triage out of W24. The latency angle
-              is the hard part, and it is exactly what I was deep in shipping 0
-              to 1 health features last year.
-            </p>
-            <p>
-              Portfolio: <span className="text-spice">abeerkdas.me</span>.
-              Resume attached.
-            </p>
-          </div>
-          <div className="mt-5 flex items-center gap-2">
-            <span className="bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap shadow-sm">
-              Copy email
-            </span>
-            <span className="border-border text-muted-foreground rounded-lg border px-3 py-1.5 text-xs whitespace-nowrap">
-              Regenerate
-            </span>
-            <span className="text-muted-foreground ml-auto hidden text-xs whitespace-nowrap lg:inline">
-              Personalized from your resume
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------------------
    Frosted preview mocks — each a distinct little surface with one quiet ambient
    loop (gated to no-preference in globals.css). Not identical rectangles.
+   Interactive bits (buttons, rows) carry hover feedback.
 --------------------------------------------------------------------------- */
 function DatabaseMock() {
   const rows = [
@@ -380,13 +299,13 @@ function DatabaseMock() {
         Search batch, industry, team size
         <span className="anim-caret bg-foreground/60 ml-0.5 inline-block h-4 w-px" />
       </div>
-      <div className="divide-border/70 mt-2 divide-y">
+      <div className="mt-2">
         {rows.map((r) => (
           <div
             key={r.name}
             className={cn(
-              "flex items-center justify-between py-2.5 text-sm",
-              r.fresh && "bg-spice/5 -mx-2 rounded-md px-2",
+              "hover:bg-accent/50 -mx-2 flex cursor-pointer items-center justify-between rounded-md px-2 py-2.5 text-sm transition-colors",
+              r.fresh && "bg-spice/5",
             )}
           >
             <span className="text-foreground font-medium">{r.name}</span>
@@ -427,10 +346,10 @@ function EmailMock() {
         </p>
       </div>
       <div className="mt-4 flex gap-2">
-        <span className="anim-glow bg-primary text-primary-foreground rounded-lg px-3 py-1.5 text-xs font-medium">
+        <span className="anim-glow bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors">
           Copy email
         </span>
-        <span className="border-border text-muted-foreground rounded-lg border px-3 py-1.5 text-xs">
+        <span className="border-border text-muted-foreground hover:bg-accent cursor-pointer rounded-lg border px-3 py-1.5 text-xs transition-colors">
           Regenerate
         </span>
       </div>
@@ -455,7 +374,7 @@ function TrackerMock() {
         {rows.map((r) => (
           <div
             key={r.name}
-            className="bg-background/50 flex items-center justify-between rounded-lg px-3 py-2.5 text-sm"
+            className="bg-background/50 hover:bg-accent/60 flex cursor-pointer items-center justify-between rounded-lg px-3 py-2.5 text-sm transition-colors"
           >
             <span className="text-foreground font-medium">{r.name}</span>
             <span
@@ -492,7 +411,7 @@ function ContactMock() {
         <span className="anim-tease text-muted-foreground truncate text-sm tracking-wide select-none">
           rodrigo@caladan.health
         </span>
-        <span className="anim-glow bg-primary text-primary-foreground shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium">
+        <span className="anim-glow bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition-colors">
           Unlock
         </span>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { Check, Plus, X } from "lucide-react";
+import { addToTracker } from "@/app/(app)/tracker/actions";
 import type { StartupRow } from "@/lib/startups";
 import { cn } from "@/lib/utils";
 import { OutreachModal } from "./outreach-modal";
@@ -26,6 +27,16 @@ export function StartupDetail({
 }) {
   const [visible, setVisible] = useState(false);
   const [outreachOpen, setOutreachOpen] = useState(false);
+  const [trackState, setTrackState] = useState<"idle" | "saving" | "done">(
+    "idle",
+  );
+
+  const handleTrack = async () => {
+    if (trackState !== "idle") return;
+    setTrackState("saving");
+    await addToTracker(startup.id);
+    setTrackState("done");
+  };
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => setVisible(true));
@@ -174,6 +185,22 @@ export function StartupDetail({
             className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
           >
             Cold outreach email
+          </button>
+          <button
+            onClick={handleTrack}
+            disabled={trackState !== "idle"}
+            className="border-input hover:bg-accent flex w-full items-center justify-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-70"
+          >
+            {trackState === "done" ? (
+              <>
+                <Check className="size-4" /> Added to tracker
+              </>
+            ) : (
+              <>
+                <Plus className="size-4" />{" "}
+                {trackState === "saving" ? "Adding…" : "Add to tracker"}
+              </>
+            )}
           </button>
           {s.website || s.ycUrl ? (
             <div className="flex gap-2">

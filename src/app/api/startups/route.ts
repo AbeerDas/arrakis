@@ -15,14 +15,15 @@ export async function GET(request: NextRequest) {
   await requireUser();
 
   const sp = request.nextUrl.searchParams;
+  const tags = sp.getAll("tags").filter(Boolean);
   const result = await queryStartups({
     q: sp.get("q") ?? undefined,
     batch: sp.get("batch") ?? undefined,
     industry: sp.get("industry") ?? undefined,
     stage: sp.get("stage") ?? undefined,
     status: sp.get("status") ?? undefined,
-    minSize: num(sp.get("minSize")),
-    maxSize: num(sp.get("maxSize")),
+    tags: tags.length ? tags : undefined,
+    hiring: sp.get("hiring") === "1" || undefined,
     page: num(sp.get("page")) ?? 1,
   });
 

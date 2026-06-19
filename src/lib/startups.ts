@@ -1,15 +1,4 @@
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gte,
-  ilike,
-  lte,
-  or,
-  sql,
-} from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { startups } from "@/db/schema";
 
@@ -34,6 +23,7 @@ export type StartupRow = {
   location: string | null;
   founderNames: string[];
   isNew: boolean;
+  isHiring: boolean;
 };
 
 export type StartupFilters = {
@@ -42,8 +32,8 @@ export type StartupFilters = {
   industry?: string;
   stage?: string;
   status?: string;
-  minSize?: number;
-  maxSize?: number;
+  tags?: string[];
+  hiring?: boolean;
   page?: number;
 };
 
@@ -52,6 +42,7 @@ export type FilterOptions = {
   industries: string[];
   stages: string[];
   statuses: string[];
+  tags: string[];
 };
 
 function buildWhere(f: StartupFilters) {
@@ -72,10 +63,18 @@ function buildWhere(f: StartupFilters) {
   if (f.industry) conds.push(eq(startups.industry, f.industry));
   if (f.stage) conds.push(eq(startups.stage, f.stage));
   if (f.status) conds.push(eq(startups.status, f.status));
-  if (typeof f.minSize === "number")
-    conds.push(gte(startups.teamSize, f.minSize));
-  if (typeof f.maxSize === "number")
-    conds.push(lte(startups.teamSize, f.maxSize));
+  // Match rows whose tags jsonb array contains ANY of the selected tags.
+  // jsonb_exists(tags, $tag) backs the `?` operator; OR-ing scalar-bound calls
+  // avoids the array-param pitfall of the `?|` operator through the driver.
+  if (f.tags?.length) {
+    conds.push(
+      or(...f.tags.map((t) => sql`jsonb_exists(${startups.tags}, ${t})`)),
+    );
+  }
+  // isHiring lives in the raw source payload (not its own column).
+  if (f.hiring) {
+    conds.push(sql`(${startups.sourceData}->>'isHiring')::boolean is true`);
+  }
   return conds.length ? and(...conds) : undefined;
 }
 
@@ -107,6 +106,7 @@ export async function queryStartups(
         location: startups.location,
         founderNames: startups.founderNames,
         isNew: sql<boolean>`${startups.firstSeenAt} > now() - make_interval(days => 7)`,
+        isHiring: sql<boolean>`coalesce((${startups.sourceData}->>'isHiring')::boolean, false)`,
       })
       .from(startups)
       .where(where)
@@ -136,12 +136,22 @@ export async function getFilterOptions(): Promise<FilterOptions> {
     return rows.map((r) => r.v).filter((v): v is string => Boolean(v));
   };
 
-  const [batches, industries, stages, statuses] = await Promise.all([
+  const [batches, industries, stages, statuses, tagRows] = await Promise.all([
     distinct(startups.batch),
     distinct(startups.industry),
     distinct(startups.stage),
     distinct(startups.status),
+    // Expand the tags jsonb arrays into a distinct, flat list.
+    db
+      .selectDistinct({
+        tag: sql<string>`jsonb_array_elements_text(${startups.tags})`,
+      })
+      .from(startups),
   ]);
+  const tags = tagRows
+    .map((r) => r.tag)
+    .filter((v): v is string => Boolean(v))
+    .sort((a, b) => a.localeCompare(b));
   // Batches read best newest-first.
-  return { batches: batches.reverse(), industries, stages, statuses };
+  return { batches: batches.reverse(), industries, stages, statuses, tags };
 }

@@ -163,6 +163,21 @@
       filter 0.7s var(--ease-dune),
       transform 0.7s var(--ease-dune);
   }
+  /* Directional variants — each settles in from its own direction. Defined
+     after .reveal (override its transform) and before .reveal--in (which wins
+     once shown). */
+  .reveal-left {
+    filter: blur(8px);
+    transform: translateX(-36px);
+  }
+  .reveal-right {
+    filter: blur(8px);
+    transform: translateX(36px);
+  }
+  .reveal-scale {
+    filter: blur(10px);
+    transform: scale(0.93);
+  }
   .reveal--in {
     opacity: 1;
     filter: blur(0);

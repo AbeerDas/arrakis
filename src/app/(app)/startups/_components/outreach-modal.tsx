@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { generateOutreachPrompt } from "@/app/(app)/outreach/actions";
 
 type Status =
@@ -24,6 +24,14 @@ export function OutreachModal({
   const [jobPosting, setJobPosting] = useState("");
   const [notes, setNotes] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [toast, setToast] = useState(false);
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fireToast = useCallback(() => {
+    setToast(true);
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast(false), 2200);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -32,6 +40,13 @@ export function OutreachModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+    },
+    [],
+  );
 
   const build = async () => {
     setStatus({ kind: "loading" });
@@ -51,6 +66,7 @@ export function OutreachModal({
         copied = false;
       }
       setStatus({ kind: "ready", prompt: res.prompt, copied });
+      if (copied) fireToast();
     } catch {
       setStatus({ kind: "error" });
     }
@@ -61,6 +77,7 @@ export function OutreachModal({
     try {
       await navigator.clipboard.writeText(status.prompt);
       setStatus({ ...status, copied: true });
+      fireToast();
     } catch {
       /* ignore */
     }
@@ -198,6 +215,15 @@ export function OutreachModal({
           </a>
         </div>
       </div>
+
+      {toast ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[80] flex justify-center px-4">
+          <div className="bg-foreground text-background animate-in fade-in slide-in-from-bottom-2 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium shadow-lg duration-200">
+            <Check className="size-4" />
+            Copied to clipboard
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

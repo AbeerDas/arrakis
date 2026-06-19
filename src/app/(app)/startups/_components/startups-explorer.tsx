@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  Check,
   ChevronDown,
   ExternalLink,
   LayoutGrid,
@@ -71,6 +72,110 @@ function Select({
   );
 }
 
+/** Searchable multi-select tag dropdown. Matches rows that have ANY checked tag. */
+function TagFilter({
+  options,
+  selected,
+  onToggle,
+  onClear,
+}: {
+  options: string[];
+  selected: string[];
+  onToggle: (tag: string) => void;
+  onClear: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  const needle = search.trim().toLowerCase();
+  const filtered = needle
+    ? options.filter((t) => t.toLowerCase().includes(needle))
+    : options;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="border-input bg-background hover:bg-accent flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-sm transition-colors"
+      >
+        Tags
+        {selected.length > 0 ? (
+          <span className="bg-spice/15 text-spice rounded-full px-1.5 text-xs font-medium">
+            {selected.length}
+          </span>
+        ) : null}
+        <ChevronDown className="text-muted-foreground size-3.5" />
+      </button>
+
+      {open ? (
+        <div className="bg-popover text-popover-foreground absolute left-0 z-30 mt-1.5 w-64 rounded-xl border p-2 shadow-lg">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search tags"
+            autoFocus
+            className="border-input bg-background mb-2 h-8 w-full rounded-md border px-2 text-sm focus-visible:outline-none"
+          />
+          <div className="max-h-64 space-y-0.5 overflow-y-auto">
+            {filtered.length === 0 ? (
+              <p className="text-muted-foreground px-2 py-3 text-center text-xs">
+                No tags match.
+              </p>
+            ) : (
+              filtered.map((t) => {
+                const checked = selected.includes(t);
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => onToggle(t)}
+                    className="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                  >
+                    <span
+                      className={cn(
+                        "flex size-4 shrink-0 items-center justify-center rounded border",
+                        checked
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "border-input",
+                      )}
+                    >
+                      {checked ? <Check className="size-3" /> : null}
+                    </span>
+                    <span className="truncate">{t}</span>
+                  </button>
+                );
+              })
+            )}
+          </div>
+          {selected.length > 0 ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="text-muted-foreground hover:text-foreground mt-1.5 w-full rounded-md px-2 py-1 text-left text-xs"
+            >
+              Clear tags
+            </button>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function StartupsExplorer({
   initialRows,
   initialTotal,
@@ -87,8 +192,8 @@ export function StartupsExplorer({
   const [industry, setIndustry] = useState("");
   const [stage, setStage] = useState("");
   const [status, setStatus] = useState("");
-  const [minSize, setMinSize] = useState("");
-  const [maxSize, setMaxSize] = useState("");
+  const [tags, setTags] = useState<string[]>([]);
+  const [hiring, setHiring] = useState(false);
   const [view, setView] = useState<View>("list");
 
   const [rows, setRows] = useState(initialRows);
@@ -112,12 +217,12 @@ export function StartupsExplorer({
       if (industry) p.set("industry", industry);
       if (stage) p.set("stage", stage);
       if (status) p.set("status", status);
-      if (minSize) p.set("minSize", minSize);
-      if (maxSize) p.set("maxSize", maxSize);
+      for (const t of tags) p.append("tags", t);
+      if (hiring) p.set("hiring", "1");
       p.set("page", String(page));
       return p.toString();
     },
-    [q, batch, industry, stage, status, minSize, maxSize],
+    [q, batch, industry, stage, status, tags, hiring],
   );
 
   const fetchPage = useCallback(
@@ -174,7 +279,7 @@ export function StartupsExplorer({
   }, [hasMore, loading, fetchPage]);
 
   const hasFilters = Boolean(
-    q || batch || industry || stage || status || minSize || maxSize,
+    q || batch || industry || stage || status || tags.length || hiring,
   );
   const clearAll = () => {
     setQ("");
@@ -182,100 +287,110 @@ export function StartupsExplorer({
     setIndustry("");
     setStage("");
     setStatus("");
-    setMinSize("");
-    setMaxSize("");
+    setTags([]);
+    setHiring(false);
   };
+  const toggleTag = (t: string) =>
+    setTags((prev) =>
+      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t],
+    );
 
   return (
     <div>
-      {/* filter bar */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-50 flex-1">
-          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search name, one-liner, industry, location"
-            className="border-input bg-background focus-visible:ring-ring h-9 w-full rounded-lg border pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
-          />
+      {/* filter bar — search + view on top, filters on their own row below */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search name, one-liner, industry, location"
+              className="border-input bg-background focus-visible:ring-ring h-9 w-full rounded-lg border pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
+            />
+          </div>
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              onClick={() => setView("list")}
+              aria-label="List view"
+              aria-pressed={view === "list"}
+              className={cn(
+                "rounded-md p-1.5 transition-colors",
+                view === "list"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <List className="size-4" />
+            </button>
+            <button
+              onClick={() => setView("tile")}
+              aria-label="Grid view"
+              aria-pressed={view === "tile"}
+              className={cn(
+                "rounded-md p-1.5 transition-colors",
+                view === "tile"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <LayoutGrid className="size-4" />
+            </button>
+          </div>
         </div>
-        <Select
-          value={batch}
-          onChange={setBatch}
-          placeholder="Batch"
-          options={options.batches}
-        />
-        <Select
-          value={industry}
-          onChange={setIndustry}
-          placeholder="Industry"
-          options={options.industries}
-        />
-        <Select
-          value={stage}
-          onChange={setStage}
-          placeholder="Stage"
-          options={options.stages}
-        />
-        <Select
-          value={status}
-          onChange={setStatus}
-          placeholder="Status"
-          options={options.statuses}
-        />
-        <div className="flex items-center gap-1">
-          <input
-            value={minSize}
-            onChange={(e) => setMinSize(e.target.value.replace(/\D/g, ""))}
-            inputMode="numeric"
-            placeholder="Min"
-            className="border-input bg-background h-9 w-16 rounded-lg border px-2 text-sm"
-          />
-          <span className="text-muted-foreground text-xs">to</span>
-          <input
-            value={maxSize}
-            onChange={(e) => setMaxSize(e.target.value.replace(/\D/g, ""))}
-            inputMode="numeric"
-            placeholder="Max"
-            className="border-input bg-background h-9 w-16 rounded-lg border px-2 text-sm"
-          />
-        </div>
-        {hasFilters ? (
-          <button
-            onClick={clearAll}
-            className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
-          >
-            Clear
-          </button>
-        ) : null}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Select
+            value={batch}
+            onChange={setBatch}
+            placeholder="Batch"
+            options={options.batches}
+          />
+          <Select
+            value={industry}
+            onChange={setIndustry}
+            placeholder="Industry"
+            options={options.industries}
+          />
+          <Select
+            value={stage}
+            onChange={setStage}
+            placeholder="Stage"
+            options={options.stages}
+          />
+          <Select
+            value={status}
+            onChange={setStatus}
+            placeholder="Status"
+            options={options.statuses}
+          />
+          <TagFilter
+            options={options.tags}
+            selected={tags}
+            onToggle={toggleTag}
+            onClear={() => setTags([])}
+          />
           <button
-            onClick={() => setView("list")}
-            aria-label="List view"
-            aria-pressed={view === "list"}
+            type="button"
+            onClick={() => setHiring((h) => !h)}
+            aria-pressed={hiring}
             className={cn(
-              "rounded-md p-1.5 transition-colors",
-              view === "list"
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:text-foreground",
+              "h-9 rounded-lg border px-3 text-sm transition-colors",
+              hiring
+                ? "border-spice bg-spice/10 text-spice"
+                : "border-input bg-background hover:bg-accent",
             )}
           >
-            <List className="size-4" />
+            Hiring now
           </button>
-          <button
-            onClick={() => setView("tile")}
-            aria-label="Grid view"
-            aria-pressed={view === "tile"}
-            className={cn(
-              "rounded-md p-1.5 transition-colors",
-              view === "tile"
-                ? "bg-accent text-foreground"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <LayoutGrid className="size-4" />
-          </button>
+          {hasFilters ? (
+            <button
+              onClick={clearAll}
+              className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+            >
+              Clear
+            </button>
+          ) : null}
         </div>
       </div>
 
