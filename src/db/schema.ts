@@ -91,12 +91,19 @@ export const startups = pgTable(
     foundedDate: date("founded_date"),
     industry: text("industry"),
     subindustry: text("subindustry"),
-    tags: jsonb("tags").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    tags: jsonb("tags")
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     regions: jsonb("regions")
       .$type<string[]>()
       .notNull()
       .default(sql`'[]'::jsonb`),
     teamSize: integer("team_size"),
+    // Logo + growth signals surfaced from the source for the list/tiles/filters.
+    logoUrl: text("logo_url"),
+    stage: text("stage"),
+    location: text("location"),
     // Founder NAMES come from yc-oss (no emails); reachable emails live in `contacts`.
     founderNames: jsonb("founder_names")
       .$type<string[]>()
@@ -118,9 +125,35 @@ export const startups = pgTable(
     uniqueIndex("startups_source_external_id_key").on(t.source, t.externalId),
     index("startups_industry_idx").on(t.industry),
     index("startups_batch_idx").on(t.batch),
+    index("startups_stage_idx").on(t.stage),
+    index("startups_team_size_idx").on(t.teamSize),
     index("startups_first_seen_at_idx").on(t.firstSeenAt),
   ],
 );
+
+// ---------------------------------------------------------------------------
+// outreach_profiles — one per user; inputs for the cold-email prompt wrapper.
+// Pre-MVP: the assembled prompt is copied to the clipboard and run in Claude.
+// ---------------------------------------------------------------------------
+
+export const outreachProfiles = pgTable("outreach_profiles", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  resumeText: text("resume_text"),
+  // "text" | "latex" — how to label the resume block in the prompt.
+  resumeFormat: text("resume_format").notNull().default("text"),
+  // Path in the Supabase Storage `resumes` bucket (for the user's own reference).
+  resumePdfPath: text("resume_pdf_path"),
+  // About / accomplishments / anything else worth personalizing with.
+  personalization: text("personalization"),
+  linkedinUrl: text("linkedin_url"),
+  portfolioUrl: text("portfolio_url"),
+  // Example emails that have worked, used as few-shot in the prompt.
+  templates: text("templates"),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+});
 
 // ---------------------------------------------------------------------------
 // contacts — founder/cofounder contacts on a startup

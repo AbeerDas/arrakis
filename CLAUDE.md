@@ -32,6 +32,14 @@ Domain-specific standards live in the project skills (`.claude/skills/`):
 `frontend`, `backend`, `testing-and-quality`, `security-and-privacy`. They load
 automatically when relevant. The always-on basics:
 
+### Writing (copy, commits, comments, everything)
+
+- **Never use em dashes (`—`).** Anywhere: UI copy, landing pages, commit
+  messages, code comments, docs, PR text. Rewrite with a period, comma, or
+  parentheses instead. (En dashes in numeric ranges like `1–10` are fine.)
+- Keep copy short and plain. Prefer one tight sentence over two long ones; cut
+  filler. Cheeky-but-professional, never salesy or cluttered.
+
 ### Commit messages
 
 - **One casual sentence, usually 2–9 words.** Lowercase, plain English.
@@ -48,7 +56,7 @@ automatically when relevant. The always-on basics:
 - TypeScript strict; **no `any`** (see `testing-and-quality`). Let inference
   work; type the public boundaries.
 - Match the surrounding file's style, import ordering, and comment density.
-  Comment the *why*, not the *what*; don't leave `console.log` in committed code.
+  Comment the _why_, not the _what_; don't leave `console.log` in committed code.
 - Prefer small, single-purpose functions; extract a `src/lib/*` helper once
   logic is shared. Use the `@/*` path alias for imports from `src`.
 - A change isn't done until `pnpm typecheck` and `pnpm lint` are green. Edited

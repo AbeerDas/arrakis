@@ -2,13 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { signUp } from "../actions";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -23,66 +16,69 @@ export default async function SignupPage({
 
   if (sp.check_email) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Check your email</CardTitle>
-          <CardDescription>
-            We sent you a confirmation link. Click it to finish creating your
-            account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Link href="/login" className="text-sm underline underline-offset-4">
-            Back to log in
-          </Link>
-        </CardContent>
-      </Card>
+      <div className="glass rounded-2xl p-8 shadow-sm">
+        <h1 className="font-serif text-2xl tracking-tight">Check your email</h1>
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          We sent you a confirmation link. Click it to finish creating your
+          account.
+        </p>
+        <Link
+          href="/login"
+          className="text-spice mt-5 inline-block text-sm underline-offset-4 hover:underline"
+        >
+          Back to log in
+        </Link>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Create your Arrakis account</CardTitle>
-        <CardDescription>Free to start.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {sp.error ? (
-          <p className="mb-4 text-sm text-destructive">{sp.error}</p>
-        ) : null}
-        <form action={signUp} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Sign up
-          </Button>
-        </form>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link href="/login" className="underline underline-offset-4">
-            Log in
-          </Link>
-        </p>
-      </CardContent>
-    </Card>
+    <div className="glass rounded-2xl p-8 shadow-sm">
+      <h1 className="font-serif text-2xl tracking-tight">
+        Create your Arrakis account
+      </h1>
+      <p className="text-muted-foreground mt-1 text-sm">Free to start.</p>
+
+      {sp.error ? (
+        <p className="text-destructive mt-4 text-sm">{sp.error}</p>
+      ) : null}
+
+      <form action={signUp} className="mt-6 space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+          />
+        </div>
+        <Button type="submit" className="w-full rounded-xl">
+          Sign up
+        </Button>
+      </form>
+
+      <p className="text-muted-foreground mt-5 text-sm">
+        Already have an account?{" "}
+        <Link
+          href="/login"
+          className="text-spice underline-offset-4 hover:underline"
+        >
+          Log in
+        </Link>
+      </p>
+    </div>
   );
 }

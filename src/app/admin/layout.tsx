@@ -7,11 +7,11 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   // Admin-only boundary, enforced server-side.
-  const profile = await requireAdmin();
+  await requireAdmin();
 
   return (
     <div className="flex min-h-screen flex-col">
-      <AppNav isAdmin email={profile.email} />
+      <AppNav isAdmin />
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
         {children}
       </main>

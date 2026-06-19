@@ -8,6 +8,20 @@
       "when": 1781804298273,
       "tag": "0000_handy_legion",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781834023969,
+      "tag": "0001_absurd_mikhail_rasputin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781840551473,
+      "tag": "0002_panoramic_mastermind",
+      "breakpoints": true
     }
   ]
 }

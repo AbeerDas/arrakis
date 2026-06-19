@@ -1,0 +1,365 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { LayoutGrid, List, Search } from "lucide-react";
+import type { FilterOptions, StartupRow } from "@/lib/startups";
+import { cn } from "@/lib/utils";
+import { StartupDetail } from "./startup-detail";
+
+type View = "list" | "tile";
+
+function Logo({ row, size }: { row: StartupRow; size: number }) {
+  if (row.logoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={row.logoUrl}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        className="border-border/60 bg-card shrink-0 rounded-md border object-contain p-1"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+  return (
+    <span
+      className="bg-foreground/10 flex shrink-0 items-center justify-center rounded-md font-serif"
+      style={{ width: size, height: size }}
+    >
+      {row.name.charAt(0)}
+    </span>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="border-border/70 text-muted-foreground rounded-full border px-2 py-0.5 text-xs whitespace-nowrap">
+      {children}
+    </span>
+  );
+}
+
+function Select({
+  value,
+  onChange,
+  placeholder,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  options: string[];
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="border-input bg-background h-9 rounded-lg border px-2.5 text-sm"
+    >
+      <option value="">{placeholder}</option>
+      {options.map((o) => (
+        <option key={o} value={o}>
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+export function StartupsExplorer({
+  initialRows,
+  initialTotal,
+  initialHasMore,
+  options,
+}: {
+  initialRows: StartupRow[];
+  initialTotal: number;
+  initialHasMore: boolean;
+  options: FilterOptions;
+}) {
+  const [q, setQ] = useState("");
+  const [batch, setBatch] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [stage, setStage] = useState("");
+  const [status, setStatus] = useState("");
+  const [minSize, setMinSize] = useState("");
+  const [maxSize, setMaxSize] = useState("");
+  const [view, setView] = useState<View>("list");
+
+  const [rows, setRows] = useState(initialRows);
+  const [total, setTotal] = useState(initialTotal);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [loading, setLoading] = useState(false);
+  const [selected, setSelected] = useState<StartupRow | null>(null);
+
+  const pageRef = useRef(1);
+  const reqRef = useRef(0);
+  const firstRun = useRef(true);
+
+  const params = useCallback(
+    (page: number) => {
+      const p = new URLSearchParams();
+      if (q) p.set("q", q);
+      if (batch) p.set("batch", batch);
+      if (industry) p.set("industry", industry);
+      if (stage) p.set("stage", stage);
+      if (status) p.set("status", status);
+      if (minSize) p.set("minSize", minSize);
+      if (maxSize) p.set("maxSize", maxSize);
+      p.set("page", String(page));
+      return p.toString();
+    },
+    [q, batch, industry, stage, status, minSize, maxSize],
+  );
+
+  const fetchPage = useCallback(
+    async (page: number, reset: boolean) => {
+      const id = ++reqRef.current;
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/startups?${params(page)}`);
+        const data = (await res.json()) as {
+          rows: StartupRow[];
+          total: number;
+          hasMore: boolean;
+        };
+        if (id !== reqRef.current) return;
+        pageRef.current = page;
+        setRows((prev) => (reset ? data.rows : [...prev, ...data.rows]));
+        setTotal(data.total);
+        setHasMore(data.hasMore);
+      } finally {
+        if (id === reqRef.current) setLoading(false);
+      }
+    },
+    [params],
+  );
+
+  // Refetch (reset to page 1) when filters change, debounced. Skips the first
+  // run since the server already provided the unfiltered first page.
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      void fetchPage(1, true);
+    }, 250);
+    return () => clearTimeout(t);
+  }, [fetchPage]);
+
+  // Infinite scroll: load the next page when the sentinel enters view.
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !loading) {
+          void fetchPage(pageRef.current + 1, false);
+        }
+      },
+      { rootMargin: "400px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, loading, fetchPage]);
+
+  const hasFilters = Boolean(
+    q || batch || industry || stage || status || minSize || maxSize,
+  );
+  const clearAll = () => {
+    setQ("");
+    setBatch("");
+    setIndustry("");
+    setStage("");
+    setStatus("");
+    setMinSize("");
+    setMaxSize("");
+  };
+
+  return (
+    <div>
+      {/* filter bar */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="relative min-w-50 flex-1">
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search name, one-liner, industry, location"
+            className="border-input bg-background focus-visible:ring-ring h-9 w-full rounded-lg border pr-3 pl-9 text-sm focus-visible:ring-2 focus-visible:outline-none"
+          />
+        </div>
+        <Select
+          value={batch}
+          onChange={setBatch}
+          placeholder="Batch"
+          options={options.batches}
+        />
+        <Select
+          value={industry}
+          onChange={setIndustry}
+          placeholder="Industry"
+          options={options.industries}
+        />
+        <Select
+          value={stage}
+          onChange={setStage}
+          placeholder="Stage"
+          options={options.stages}
+        />
+        <Select
+          value={status}
+          onChange={setStatus}
+          placeholder="Status"
+          options={options.statuses}
+        />
+        <div className="flex items-center gap-1">
+          <input
+            value={minSize}
+            onChange={(e) => setMinSize(e.target.value.replace(/\D/g, ""))}
+            inputMode="numeric"
+            placeholder="Min"
+            className="border-input bg-background h-9 w-16 rounded-lg border px-2 text-sm"
+          />
+          <span className="text-muted-foreground text-xs">to</span>
+          <input
+            value={maxSize}
+            onChange={(e) => setMaxSize(e.target.value.replace(/\D/g, ""))}
+            inputMode="numeric"
+            placeholder="Max"
+            className="border-input bg-background h-9 w-16 rounded-lg border px-2 text-sm"
+          />
+        </div>
+        {hasFilters ? (
+          <button
+            onClick={clearAll}
+            className="text-muted-foreground hover:text-foreground text-sm underline-offset-4 hover:underline"
+          >
+            Clear
+          </button>
+        ) : null}
+
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            onClick={() => setView("list")}
+            aria-label="List view"
+            aria-pressed={view === "list"}
+            className={cn(
+              "rounded-md p-1.5 transition-colors",
+              view === "list"
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <List className="size-4" />
+          </button>
+          <button
+            onClick={() => setView("tile")}
+            aria-label="Grid view"
+            aria-pressed={view === "tile"}
+            className={cn(
+              "rounded-md p-1.5 transition-colors",
+              view === "tile"
+                ? "bg-accent text-foreground"
+                : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <LayoutGrid className="size-4" />
+          </button>
+        </div>
+      </div>
+
+      <p className="text-muted-foreground mt-3 text-sm">
+        {total.toLocaleString()} {total === 1 ? "startup" : "startups"}
+      </p>
+
+      {/* results */}
+      {rows.length === 0 && !loading ? (
+        <p className="text-muted-foreground mt-16 text-center">
+          No startups match these filters.
+        </p>
+      ) : view === "list" ? (
+        <div className="mt-4">
+          {rows.map((r) => (
+            <button
+              key={r.id}
+              onClick={() => setSelected(r)}
+              className="border-border/60 hover:bg-accent/40 flex w-full items-center gap-4 border-b py-3 text-left transition-colors"
+            >
+              <Logo row={r} size={40} />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate font-medium">{r.name}</span>
+                  {r.isNew ? (
+                    <span className="bg-spice/10 text-spice rounded-full px-2 py-0.5 text-xs">
+                      New
+                    </span>
+                  ) : null}
+                </div>
+                {r.oneLiner ? (
+                  <p className="text-muted-foreground truncate text-sm">
+                    {r.oneLiner}
+                  </p>
+                ) : null}
+              </div>
+              <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
+                {r.batch ? <Chip>{r.batch}</Chip> : null}
+                {r.stage ? <Chip>{r.stage}</Chip> : null}
+                {typeof r.teamSize === "number" && r.teamSize > 0 ? (
+                  <Chip>{r.teamSize} ppl</Chip>
+                ) : null}
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((r) => (
+            <button
+              key={r.id}
+              onClick={() => setSelected(r)}
+              className="border-border/60 hover:bg-accent/40 flex flex-col rounded-xl border p-4 text-left transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Logo row={r} size={36} />
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {r.name}
+                </span>
+                {r.isNew ? (
+                  <span className="bg-spice/10 text-spice rounded-full px-2 py-0.5 text-xs">
+                    New
+                  </span>
+                ) : null}
+              </div>
+              {r.oneLiner ? (
+                <p className="text-muted-foreground mt-3 line-clamp-2 text-sm">
+                  {r.oneLiner}
+                </p>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {r.batch ? <Chip>{r.batch}</Chip> : null}
+                {r.stage ? <Chip>{r.stage}</Chip> : null}
+                {r.location ? <Chip>{r.location.split(",")[0]}</Chip> : null}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {loading ? (
+        <p className="text-muted-foreground mt-6 text-center text-sm">
+          Loading…
+        </p>
+      ) : null}
+      <div ref={sentinelRef} className="h-px" />
+
+      {selected ? (
+        <StartupDetail startup={selected} onClose={() => setSelected(null)} />
+      ) : null}
+    </div>
+  );
+}

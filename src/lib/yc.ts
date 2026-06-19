@@ -14,11 +14,14 @@ interface YcCompany {
   long_description?: string;
   batch?: string;
   status?: string;
+  stage?: string;
   industry?: string;
   subindustry?: string;
   tags?: string[];
   regions?: string[];
   team_size?: number | null;
+  small_logo_thumb_url?: string;
+  all_locations?: string;
 }
 
 export interface RefreshResult {
@@ -50,11 +53,14 @@ export async function refreshYcStartups(): Promise<RefreshResult> {
       website: c.website ?? null,
       batch: c.batch ?? null,
       status: c.status ?? null,
+      stage: c.stage ?? null,
       industry: c.industry ?? null,
       subindustry: c.subindustry ?? null,
       tags: Array.isArray(c.tags) ? c.tags : [],
       regions: Array.isArray(c.regions) ? c.regions : [],
       teamSize: typeof c.team_size === "number" ? c.team_size : null,
+      logoUrl: c.small_logo_thumb_url ?? null,
+      location: c.all_locations ?? null,
       source: "yc-oss",
       externalId: String(c.id),
       sourceData: c,
@@ -78,11 +84,14 @@ export async function refreshYcStartups(): Promise<RefreshResult> {
           website: sql`excluded.website`,
           batch: sql`excluded.batch`,
           status: sql`excluded.status`,
+          stage: sql`excluded.stage`,
           industry: sql`excluded.industry`,
           subindustry: sql`excluded.subindustry`,
           tags: sql`excluded.tags`,
           regions: sql`excluded.regions`,
           teamSize: sql`excluded.team_size`,
+          logoUrl: sql`excluded.logo_url`,
+          location: sql`excluded.location`,
           sourceData: sql`excluded.source_data`,
           updatedAt: sql`now()`,
         },
