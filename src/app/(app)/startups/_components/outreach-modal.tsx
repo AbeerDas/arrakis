@@ -81,7 +81,7 @@ export function OutreachModal({
       >
         <div className="flex items-start justify-between gap-3 border-b p-5">
           <div>
-            <h2 className="font-serif text-xl tracking-tight">
+            <h2 className="text-xl font-semibold tracking-tight">
               Cold outreach email
             </h2>
             <p className="text-muted-foreground mt-0.5 text-sm">

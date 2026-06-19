@@ -27,7 +27,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
               className="h-6 w-6 object-contain"
               priority
             />
-            <span className="font-serif text-lg tracking-tight sm:text-xl">
+            <span className="text-lg font-semibold tracking-tight sm:text-xl">
               Arrakis
             </span>
           </Link>

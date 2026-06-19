@@ -11,22 +11,11 @@ export default async function StartupsPage() {
   ]);
 
   return (
-    <div>
-      <div className="flex items-baseline justify-between gap-4">
-        <h1 className="font-serif text-3xl tracking-tight">Startups</h1>
-      </div>
-      <p className="text-muted-foreground mt-1 text-sm">
-        The full YC list, refreshed nightly. Newest first.
-      </p>
-
-      <div className="mt-8">
-        <StartupsExplorer
-          initialRows={rows}
-          initialTotal={total}
-          initialHasMore={hasMore}
-          options={options}
-        />
-      </div>
-    </div>
+    <StartupsExplorer
+      initialRows={rows}
+      initialTotal={total}
+      initialHasMore={hasMore}
+      options={options}
+    />
   );
 }

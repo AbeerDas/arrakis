@@ -29,7 +29,7 @@ export default function LandingPage() {
               Move first · the rest follow
             </p>
           </Reveal>
-          <h1 className="mx-auto mt-6 max-w-3xl font-serif text-4xl leading-[1.05] font-medium tracking-tight sm:text-6xl md:text-7xl">
+          <h1 className="mx-auto mt-6 max-w-3xl text-4xl leading-[1.05] font-extrabold tracking-tight sm:text-5xl md:text-6xl">
             <LetterReveal text="Find startups before they know they’re hiring." />
           </h1>
           <Reveal delayMs={700}>
@@ -103,7 +103,7 @@ export default function LandingPage() {
               <p className="text-spice text-center text-xs font-medium tracking-[0.28em] uppercase">
                 How it works
               </p>
-              <h2 className="mx-auto mt-4 max-w-2xl text-center font-serif text-4xl font-medium tracking-tight sm:text-5xl">
+              <h2 className="mx-auto mt-4 max-w-2xl text-center text-4xl font-bold tracking-tight sm:text-5xl">
                 Discover. Reach. Track.
               </h2>
             </Reveal>
@@ -111,10 +111,10 @@ export default function LandingPage() {
               {STEPS.map((step, i) => (
                 <Reveal key={step.title} delayMs={i * 140}>
                   <div className="flex flex-col">
-                    <span className="text-spice/70 font-serif text-5xl font-medium">
+                    <span className="text-spice/70 text-5xl font-black tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <h3 className="mt-4 font-serif text-2xl tracking-tight">
+                    <h3 className="mt-4 text-2xl font-bold tracking-tight">
                       {step.title}
                     </h3>
                     <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
@@ -131,7 +131,7 @@ export default function LandingPage() {
         <section className="mx-auto w-full max-w-5xl px-6 py-32">
           <Reveal>
             <div className="glass rounded-3xl px-8 py-20 text-center">
-              <h2 className="mx-auto max-w-2xl font-serif text-4xl font-medium tracking-tight sm:text-5xl">
+              <h2 className="mx-auto max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
                 Be the first name in the inbox.
               </h2>
               <p className="text-muted-foreground mx-auto mt-5 max-w-lg">
@@ -154,7 +154,7 @@ export default function LandingPage() {
 
       <footer className="border-t">
         <div className="text-muted-foreground mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm">
-          <span className="text-foreground font-serif text-base tracking-tight">
+          <span className="text-foreground text-base font-semibold tracking-tight">
             Arrakis
           </span>
           <div className="flex items-center gap-6">
@@ -201,7 +201,7 @@ function FeatureRow({
         <p className="text-spice text-xs font-medium tracking-[0.24em] uppercase">
           {eyebrow}
         </p>
-        <h2 className="mt-4 font-serif text-3xl leading-tight font-medium tracking-tight sm:text-4xl">
+        <h2 className="mt-4 text-3xl leading-tight font-bold tracking-tight sm:text-4xl">
           {title}
         </h2>
         <p className="text-muted-foreground mt-4 max-w-md leading-relaxed">

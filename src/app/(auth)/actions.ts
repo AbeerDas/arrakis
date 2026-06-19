@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function signIn(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const next = String(formData.get("next") ?? "/dashboard") || "/dashboard";
+  const next = String(formData.get("next") ?? "/startups") || "/startups";
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });

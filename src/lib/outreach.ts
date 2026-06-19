@@ -71,11 +71,12 @@ type CompanyContext = {
 };
 
 const STYLE_RULES = `STYLE (follow these exactly):
+- Before writing, research the company. Use the website URL, YC profile link, and founder names provided to find concrete, specific, non-obvious details: a recent launch, a technical blog post, a funding milestone, something a founder wrote or said publicly, an unusual approach. One genuinely specific detail is worth more than ten generic observations.
 - Sound like a real person wrote it. Casual, warm, conversational. Never like an AI.
 - Concise and punchy. Short, minimal sentences. Cut every filler word.
 - Read it back as a natural, flowing conversation turned into a short email.
 - Never use em dashes. Use a period or comma instead.
-- Open with one specific, genuine line about THIS company or founder: something they built, a launch, a real detail. No generic flattery.
+- Open with one specific, genuine line about THIS company or founder built on something you actually found. No generic flattery ("love what you're building" does not count).
 - Then weave in one to three of my most relevant accomplishments, naturally, with the links inline where they fit (portfolio, notable companies, awards, the hackathon project).
 - Close with my portfolio link and "Resume attached." on its own line, then sign off "Cheers," and my first name.
 - Keep the subject line short and human.`;

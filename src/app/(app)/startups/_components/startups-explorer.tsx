@@ -1,9 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { LayoutGrid, List, Search } from "lucide-react";
+import {
+  ChevronDown,
+  ExternalLink,
+  LayoutGrid,
+  List,
+  Mail,
+  Search,
+} from "lucide-react";
 import type { FilterOptions, StartupRow } from "@/lib/startups";
 import { cn } from "@/lib/utils";
+import { OutreachModal } from "./outreach-modal";
 import { StartupDetail } from "./startup-detail";
 
 type View = "list" | "tile";
@@ -25,18 +33,10 @@ function Logo({ row, size }: { row: StartupRow; size: number }) {
   }
   return (
     <span
-      className="bg-foreground/10 flex shrink-0 items-center justify-center rounded-md font-serif"
+      className="bg-foreground/10 flex shrink-0 items-center justify-center rounded-md text-sm font-medium"
       style={{ width: size, height: size }}
     >
       {row.name.charAt(0)}
-    </span>
-  );
-}
-
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="border-border/70 text-muted-foreground rounded-full border px-2 py-0.5 text-xs whitespace-nowrap">
-      {children}
     </span>
   );
 }
@@ -53,18 +53,21 @@ function Select({
   options: string[];
 }) {
   return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="border-input bg-background h-9 rounded-lg border px-2.5 text-sm"
-    >
-      <option value="">{placeholder}</option>
-      {options.map((o) => (
-        <option key={o} value={o}>
-          {o}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="border-input bg-background h-9 w-full appearance-none rounded-lg border px-2.5 pr-7 text-sm"
+      >
+        <option value="">{placeholder}</option>
+        {options.map((o) => (
+          <option key={o} value={o}>
+            {o}
+          </option>
+        ))}
+      </select>
+      <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-2 size-3.5 -translate-y-1/2" />
+    </div>
   );
 }
 
@@ -93,6 +96,9 @@ export function StartupsExplorer({
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState<StartupRow | null>(null);
+  const [outreachCompany, setOutreachCompany] = useState<StartupRow | null>(
+    null,
+  );
 
   const pageRef = useRef(1);
   const reqRef = useRef(0);
@@ -150,7 +156,7 @@ export function StartupsExplorer({
     return () => clearTimeout(t);
   }, [fetchPage]);
 
-  // Infinite scroll: load the next page when the sentinel enters view.
+  // Infinite scroll: load next page when the sentinel enters view.
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
@@ -285,35 +291,60 @@ export function StartupsExplorer({
       ) : view === "list" ? (
         <div className="mt-4">
           {rows.map((r) => (
-            <button
+            <div
               key={r.id}
-              onClick={() => setSelected(r)}
-              className="border-border/60 hover:bg-accent/40 flex w-full items-center gap-4 border-b py-3 text-left transition-colors"
+              className="border-border/60 hover:bg-accent/40 flex w-full items-center gap-4 border-b py-3 transition-colors"
             >
-              <Logo row={r} size={40} />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="truncate font-medium">{r.name}</span>
-                  {r.isNew ? (
-                    <span className="bg-spice/10 text-spice rounded-full px-2 py-0.5 text-xs">
-                      New
-                    </span>
+              {/* left: logo + text — clicking opens detail */}
+              <button
+                onClick={() => setSelected(r)}
+                className="flex min-w-0 flex-1 items-center gap-4 text-left"
+              >
+                <Logo row={r} size={40} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="truncate font-medium">{r.name}</span>
+                    {r.isNew ? (
+                      <span className="bg-spice/10 text-spice rounded-full px-2 py-0.5 text-xs">
+                        New
+                      </span>
+                    ) : null}
+                  </div>
+                  {r.oneLiner ? (
+                    <p className="text-muted-foreground truncate text-sm">
+                      {r.oneLiner}
+                    </p>
                   ) : null}
                 </div>
-                {r.oneLiner ? (
-                  <p className="text-muted-foreground truncate text-sm">
-                    {r.oneLiner}
-                  </p>
+              </button>
+
+              {/* right: inline actions + batch */}
+              <div className="hidden shrink-0 items-center gap-3 sm:flex">
+                {r.website ? (
+                  <a
+                    href={r.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Visit ${r.name}`}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ExternalLink className="size-4" />
+                  </a>
+                ) : null}
+                <button
+                  onClick={() => setOutreachCompany(r)}
+                  aria-label={`Cold outreach for ${r.name}`}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Mail className="size-4" />
+                </button>
+                {r.batch ? (
+                  <span className="text-muted-foreground w-10 text-right text-xs">
+                    {r.batch}
+                  </span>
                 ) : null}
               </div>
-              <div className="hidden shrink-0 items-center gap-1.5 sm:flex">
-                {r.batch ? <Chip>{r.batch}</Chip> : null}
-                {r.stage ? <Chip>{r.stage}</Chip> : null}
-                {typeof r.teamSize === "number" && r.teamSize > 0 ? (
-                  <Chip>{r.teamSize} ppl</Chip>
-                ) : null}
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       ) : (
@@ -341,9 +372,16 @@ export function StartupsExplorer({
                 </p>
               ) : null}
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {r.batch ? <Chip>{r.batch}</Chip> : null}
-                {r.stage ? <Chip>{r.stage}</Chip> : null}
-                {r.location ? <Chip>{r.location.split(",")[0]}</Chip> : null}
+                {r.batch ? (
+                  <span className="border-border/70 text-muted-foreground rounded-full border px-2 py-0.5 text-xs whitespace-nowrap">
+                    {r.batch}
+                  </span>
+                ) : null}
+                {r.location ? (
+                  <span className="border-border/70 text-muted-foreground rounded-full border px-2 py-0.5 text-xs whitespace-nowrap">
+                    {r.location.split(",")[0]}
+                  </span>
+                ) : null}
               </div>
             </button>
           ))}
@@ -359,6 +397,14 @@ export function StartupsExplorer({
 
       {selected ? (
         <StartupDetail startup={selected} onClose={() => setSelected(null)} />
+      ) : null}
+
+      {outreachCompany ? (
+        <OutreachModal
+          companyId={outreachCompany.id}
+          companyName={outreachCompany.name}
+          onClose={() => setOutreachCompany(null)}
+        />
       ) : null}
     </div>
   );

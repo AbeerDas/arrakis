@@ -16,7 +16,10 @@ Three feelings to keep hitting:
 - **Warm & cinematic** — sand and ink, not clinical white/black. Light feels
   like late-afternoon desert.
 - **Liquid glass** — translucent, frosted, gently gradient surfaces that let
-  what's behind them bleed through.
+  what's behind them bleed through. Apply only to nav, cards, and overlay
+  panels. Never on form controls (`<select>`, `<input>`, `<textarea>`): they
+  pick up the OS liquid-glass treatment on macOS Sequoia and look broken. Use
+  `appearance-none` on selects and style them explicitly.
 - **Quietly alive** — things ease and blur into place, drift on scroll, breathe.
   Subtle parallax and slow motion, never flashy.
 
