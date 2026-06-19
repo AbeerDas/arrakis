@@ -26,6 +26,47 @@ verified founder contacts and an admin-only anonymized moat dashboard.
 - Nightly YC refresh is a **Vercel Cron** route (`/api/cron/refresh-yc`), not a
   separate worker.
 
+## Coding conventions
+
+Domain-specific standards live in the project skills (`.claude/skills/`):
+`frontend`, `backend`, `testing-and-quality`, `security-and-privacy`. They load
+automatically when relevant. The always-on basics:
+
+### Commit messages
+
+- **One casual sentence, usually 2–9 words.** Lowercase, plain English.
+- **No `type: description` / conventional-commit prefixes.** Never write
+  `feat:`, `fix:`, `docs:`, `chore:`, etc.
+- Describe what changed, not ceremony.
+- Good: `add startups list page`, `fix nightly refresh dedupe`,
+  `load yc companies into the db`, `tidy up the dashboard copy`.
+- Bad: `feat: add startups list page`, `docs(readme): update setup steps`,
+  `Refactored the entire data-access layer to improve maintainability`.
+
+### Code style
+
+- TypeScript strict; **no `any`** (see `testing-and-quality`). Let inference
+  work; type the public boundaries.
+- Match the surrounding file's style, import ordering, and comment density.
+  Comment the *why*, not the *what*; don't leave `console.log` in committed code.
+- Prefer small, single-purpose functions; extract a `src/lib/*` helper once
+  logic is shared. Use the `@/*` path alias for imports from `src`.
+- A change isn't done until `pnpm typecheck` and `pnpm lint` are green. Edited
+  files are auto-formatted (Prettier) on save via a hook.
+
+### File / folder structure
+
+- `src/app/(auth)/` — login, signup, sign-out actions.
+- `src/app/(app)/` — authed shell (dashboard, startups, tracker, settings);
+  `_components/` holds shell-only UI.
+- `src/app/admin/` — admin-only, behind `requireAdmin`.
+- `src/app/api/` — route handlers (cron, stripe webhook, health).
+- `src/db/` — Drizzle schema, client (`getDb`), migrations, seed/refresh CLIs.
+- `src/lib/` — shared server logic (auth, supabase clients, openrouter, stripe,
+  yc refresh, env, utils). Reusable business logic goes here, not in routes.
+- `src/components/ui/` — shadcn-style primitives; reuse before hand-rolling.
+- Routing middleware is `src/proxy.ts` (Next 16), not `middleware.ts`.
+
 ## Privacy hard lines (do NOT cross without an explicit new product decision)
 
 - `tracker_entries.sent_email_body` is **write-only**: stored for the owning user
