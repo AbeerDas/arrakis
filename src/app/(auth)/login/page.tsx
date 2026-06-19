@@ -16,7 +16,7 @@ export default async function LoginPage({
 
   return (
     <div className="glass rounded-2xl p-8 shadow-sm">
-      <h1 className="font-serif text-2xl tracking-tight">Log in to Arrakis</h1>
+      <h1 className="text-2xl font-bold tracking-tight">Log in to Arrakis</h1>
       <p className="text-muted-foreground mt-1 text-sm">Welcome back.</p>
 
       {sp.error ? (
@@ -24,7 +24,7 @@ export default async function LoginPage({
       ) : null}
 
       <form action={signIn} className="mt-6 space-y-4">
-        <input type="hidden" name="next" value={sp.next ?? "/dashboard"} />
+        <input type="hidden" name="next" value={sp.next ?? "/startups"} />
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input

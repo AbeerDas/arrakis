@@ -12,13 +12,7 @@ import { createServerClient } from "@supabase/ssr";
  * protected layout/page/route re-checks auth server-side (see src/lib/auth.ts).
  * This just improves UX and keeps tokens fresh.
  */
-const PROTECTED_PREFIXES = [
-  "/dashboard",
-  "/startups",
-  "/tracker",
-  "/settings",
-  "/admin",
-];
+const PROTECTED_PREFIXES = ["/startups", "/tracker", "/settings", "/admin"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });

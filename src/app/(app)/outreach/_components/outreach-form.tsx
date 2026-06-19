@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { ChevronDown } from "lucide-react";
 import type { OutreachProfile } from "@/lib/outreach";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,15 +32,18 @@ export function OutreachForm({
     <form action={action} className="space-y-7">
       <div className="space-y-2">
         <Label htmlFor="resume_format">Resume format</Label>
-        <select
-          id="resume_format"
-          name="resume_format"
-          defaultValue={profile?.resumeFormat ?? "text"}
-          className="border-input bg-background h-10 rounded-lg border px-3 text-sm"
-        >
-          <option value="text">Plain text</option>
-          <option value="latex">LaTeX</option>
-        </select>
+        <div className="relative w-fit">
+          <select
+            id="resume_format"
+            name="resume_format"
+            defaultValue={profile?.resumeFormat ?? "text"}
+            className="border-input bg-background h-10 appearance-none rounded-lg border pr-9 pl-3 text-sm"
+          >
+            <option value="text">Plain text</option>
+            <option value="latex">LaTeX</option>
+          </select>
+          <ChevronDown className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-3.5 -translate-y-1/2" />
+        </div>
       </div>
 
       <div className="space-y-2">

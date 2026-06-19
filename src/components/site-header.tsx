@@ -12,9 +12,9 @@ export function SiteHeader() {
           <Image
             src="/arrakis-mark.png"
             alt=""
-            width={26}
-            height={26}
-            className="h-6 w-6 object-contain"
+            width={28}
+            height={28}
+            className="h-7 w-7 object-contain mix-blend-multiply"
             priority
           />
           <span className="text-lg font-semibold tracking-tight sm:text-xl">

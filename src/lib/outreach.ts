@@ -117,7 +117,10 @@ export function buildOutreachPrompt(
   return (
     `Write one cold outreach email I can send to the startup below, ready to paste and send.\n\n` +
     `${STYLE_RULES}\n\n` +
-    `OUTPUT: the subject line, then the email body. Nothing else.\n\n` +
+    `OUTPUT, in this order:\n` +
+    `1. The subject line.\n` +
+    `2. The email body, ready to paste and send.\n` +
+    `3. A section titled "Other hooks you could swap in" — a short bulleted list of other genuinely specific, interesting things you found about the company or founders in your research that you did NOT use in the email above, but that I could drop in instead to personalize it. One concrete line each, no filler. If you honestly found nothing else worth using, write "Nothing else stood out."\n\n` +
     section("COMPANY", companyBlock) +
     section("JOB POSTING", jobPosting) +
     section("EXTRA NOTES FOR THIS EMAIL", notes) +

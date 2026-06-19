@@ -39,18 +39,22 @@ Three feelings to keep hitting:
 
 ---
 
-## 2. Color — "warm sand + ink"
+## 2. Color — "soft white + ink"
 
 Light is the canonical theme. Tokens are defined in `src/app/globals.css` as
 oklch CSS variables and exposed to Tailwind via `@theme inline`. **Always use
 tokens** (`bg-background`, `text-muted-foreground`, `border-border`, `text-spice`,
 `bg-spice`) — never raw hex/oklch in components.
 
+The page is a **soft warm white** (a near-white with a whisper of warmth, not a
+sandy fill and not a clinical pure white). Surfaces sit clean and bright; the
+warmth lives in the spice accent and the faded desert backdrop, not the base.
+
 | Token                        | Role                                                                    |
 | ---------------------------- | ----------------------------------------------------------------------- |
-| `background`                 | warm sand surface (the page)                                            |
+| `background`                 | soft warm white surface (the page)                                      |
 | `foreground`                 | warm near-black ink (text)                                              |
-| `card` / `popover`           | slightly lighter warm surfaces                                          |
+| `card` / `popover`           | near-white surfaces, a touch brighter than the page                     |
 | `primary`                    | **ink** — primary buttons are near-black (stark, like the refs)         |
 | `muted` / `muted-foreground` | warm low-contrast fills / secondary text                                |
 | `accent`                     | warm hover surface                                                      |
@@ -70,20 +74,18 @@ Rules:
 
 ## 3. Typography
 
-Two families, loaded in `src/app/layout.tsx`:
-
-- **Display — Playfair Display** (`font-serif`, `--font-playfair`): high-contrast
-  classical serif. Headlines, section titles, the wordmark, big numerals,
-  initials. This carries the brand voice — use it generously at large sizes.
-- **Body/UI — Geist Sans** (`font-sans`, default): everything else — paragraphs,
-  labels, buttons, dense UI. Keep it clean and quiet.
+- **Display & Body/UI — Geist Sans** (`font-sans`, default): headlines, section
+  titles, the wordmark, numerals, and all body/labels/buttons. Headlines are
+  **sans and heavy** (`font-bold`/`font-extrabold`), not serif. Modern, bold,
+  clean — see the landing page. (Playfair is still loaded as `font-serif` but is
+  no longer the display face; do not reach for it on new surfaces.)
 - **Mono — Geist Mono** (`font-mono`): code, keys, the occasional data accent.
 
 Guidance:
 
-- Headlines: large, `font-medium`, tight tracking (`tracking-tight`),
-  `leading-[1.04]`-ish, `text-balance`. Let them be big — negative space is part
-  of the look.
+- Headlines: large, `font-bold`/`font-extrabold`, tight tracking
+  (`tracking-tight`), `leading-[1.05]`-ish, `text-balance`. Let them be big —
+  negative space is part of the look.
 - Eyebrows: `text-xs uppercase tracking-[0.24em] text-spice`. This is the signature
   header device — use it above titles instead of a subheading-on-top.
 - Body: `text-muted-foreground`, relaxed leading, constrained measure
@@ -127,8 +129,6 @@ Primitives in `src/components/landing/`:
   (0.06–0.18); background/focal art only, never body text.
 - **`<CountUp to>`** — tallies a number on view (used for the live stat).
 - **`<LetterReveal>`** — reveals a headline letter by letter; used on the hero h1.
-- **`DuneContours`** — the signature ambient motif: crisp topographic contour
-  lines that drift slowly (CSS `contour-drift-a/-b`). Full-bleed behind the nav.
 
 Rules:
 
@@ -142,13 +142,20 @@ Rules:
 
 ## 6. The signature graphic
 
-`DuneContours` renders crisp topographic contour lines that drift slowly in two
-interleaved directions, full-bleed behind the nav to the top of the page, over a
-soft radial spice glow. It is the ambient backdrop. Color derives from `--spice`.
+The hero backdrop is a **faded desert photo** (`public/desert.jpg`: soft rolling
+dunes, pale cream-to-amber sky), full-bleed behind the hero at low opacity
+(~0.3), melted into the soft white at top and bottom with a vertical
+`background → transparent → background` gradient, plus a soft radial spice glow
+near the top. Subtle and cinematic, never a loud photo banner.
 
-When a surface needs visual interest, reach for the contours, a soft radial spice
-glow (`radial-gradient(... color-mix(in oklch, var(--spice) N%, transparent))`),
-or generous emptiness. Don't add stock illustration or icons-in-circles.
+Below the hero, the landing shows a **Mac-style app demo window** (traffic-light
+dots, the startups list on the left, a personalized cold email on the right)
+peeking up and dissolving into the page. That window is the product's hero shot.
+
+When a surface needs visual interest, reach for the faded desert backdrop, a soft
+radial spice glow (`radial-gradient(... color-mix(in oklch, var(--spice) N%,
+transparent))`), or generous emptiness. Don't add stock illustration or
+icons-in-circles.
 
 ---
 

@@ -12,19 +12,19 @@ const NAV = [
 const linkClass =
   "text-muted-foreground hover:text-foreground text-sm underline-offset-4 transition-colors hover:underline";
 
-/** Authed app nav — sleek frosted pill; the wordmark links to the dashboard. */
+/** Authed app nav — sleek frosted pill; the wordmark links to the startups list. */
 export function AppNav({ isAdmin }: { isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-50 px-4 pt-4">
       <div className="glass mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-2xl px-4 shadow-sm sm:px-5">
         <div className="flex items-center gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
+          <Link href="/startups" className="flex items-center gap-2.5">
             <Image
               src="/arrakis-mark.png"
               alt=""
-              width={26}
-              height={26}
-              className="h-6 w-6 object-contain"
+              width={28}
+              height={28}
+              className="h-7 w-7 object-contain mix-blend-multiply"
               priority
             />
             <span className="text-lg font-semibold tracking-tight sm:text-xl">

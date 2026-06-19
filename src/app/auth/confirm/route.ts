@@ -5,13 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * Handles the email-confirmation link from Supabase (signup / magic-link style
  * `token_hash` verification). On success, redirects to `next` (default
- * /dashboard); otherwise back to /login with an error.
+ * /startups); otherwise back to /login with an error.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/dashboard";
+  const next = searchParams.get("next") ?? "/startups";
 
   if (tokenHash && type) {
     const supabase = await createClient();
@@ -25,9 +25,6 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(
-    new URL(
-      "/login?error=Email+link+is+invalid+or+has+expired",
-      request.url,
-    ),
+    new URL("/login?error=Email+link+is+invalid+or+has+expired", request.url),
   );
 }

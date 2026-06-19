@@ -17,7 +17,7 @@ export default async function SignupPage({
   if (sp.check_email) {
     return (
       <div className="glass rounded-2xl p-8 shadow-sm">
-        <h1 className="font-serif text-2xl tracking-tight">Check your email</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Check your email</h1>
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
           We sent you a confirmation link. Click it to finish creating your
           account.
@@ -34,7 +34,7 @@ export default async function SignupPage({
 
   return (
     <div className="glass rounded-2xl p-8 shadow-sm">
-      <h1 className="font-serif text-2xl tracking-tight">
+      <h1 className="text-2xl font-bold tracking-tight">
         Create your Arrakis account
       </h1>
       <p className="text-muted-foreground mt-1 text-sm">Free to start.</p>

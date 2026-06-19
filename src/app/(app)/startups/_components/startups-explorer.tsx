@@ -318,8 +318,20 @@ export function StartupsExplorer({
                 </div>
               </button>
 
-              {/* right: inline actions + batch */}
+              {/* right: batch on the left, actions pushed to the outside */}
               <div className="hidden shrink-0 items-center gap-3 sm:flex">
+                {r.batch ? (
+                  <span className="text-muted-foreground w-10 text-right text-xs">
+                    {r.batch}
+                  </span>
+                ) : null}
+                <button
+                  onClick={() => setOutreachCompany(r)}
+                  aria-label={`Cold outreach for ${r.name}`}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Mail className="size-4" />
+                </button>
                 {r.website ? (
                   <a
                     href={r.website}
@@ -330,18 +342,6 @@ export function StartupsExplorer({
                   >
                     <ExternalLink className="size-4" />
                   </a>
-                ) : null}
-                <button
-                  onClick={() => setOutreachCompany(r)}
-                  aria-label={`Cold outreach for ${r.name}`}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Mail className="size-4" />
-                </button>
-                {r.batch ? (
-                  <span className="text-muted-foreground w-10 text-right text-xs">
-                    {r.batch}
-                  </span>
                 ) : null}
               </div>
             </div>

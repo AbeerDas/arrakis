@@ -33,9 +33,9 @@ export async function requireUser(): Promise<User> {
   return user;
 }
 
-/** Redirect to /dashboard unless the current user is an admin. */
+/** Redirect to /startups unless the current user is an admin. */
 export async function requireAdmin(): Promise<Profile> {
   const profile = await getCurrentProfile();
-  if (!profile?.isAdmin) redirect("/dashboard");
+  if (!profile?.isAdmin) redirect("/startups");
   return profile;
 }
