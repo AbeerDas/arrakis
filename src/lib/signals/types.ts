@@ -1,6 +1,20 @@
-import type { GithubSignal, HackerNewsSignal, NewsSignal } from "@/db/schema";
+import type {
+  GithubRepo,
+  GithubSignal,
+  HackerNewsItem,
+  HackerNewsSignal,
+  NewsItem,
+  NewsSignal,
+} from "@/db/schema";
 
-export type { GithubSignal, HackerNewsSignal, NewsSignal };
+export type {
+  GithubRepo,
+  GithubSignal,
+  HackerNewsItem,
+  HackerNewsSignal,
+  NewsItem,
+  NewsSignal,
+};
 
 /** How long a source's snapshot stays fresh before an on-demand re-fetch. */
 export const SIGNAL_TTL_MS = 3 * 24 * 60 * 60 * 1000; // 3 days

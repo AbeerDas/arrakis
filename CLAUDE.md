@@ -64,6 +64,10 @@ automatically when relevant. The always-on basics:
   Comment the _why_, not the _what_; don't leave `console.log` in committed code.
 - Prefer small, single-purpose functions; extract a `src/lib/*` helper once
   logic is shared. Use the `@/*` path alias for imports from `src`.
+- **Always design for multiple screen widths.** Every UI change must work and
+  look right from narrow mobile (~375px) up through desktop. Use responsive
+  Tailwind variants, verify the small and large breakpoints, and never ship a
+  layout that only holds together at one width.
 - A change isn't done until `pnpm typecheck` and `pnpm lint` are green. Edited
   files are auto-formatted (Prettier) on save via a hook.
 

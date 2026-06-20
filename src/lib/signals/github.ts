@@ -1,5 +1,5 @@
 import { optionalEnv } from "@/lib/env";
-import type { GithubSignal } from "@/db/schema";
+import type { GithubRepo, GithubSignal } from "@/db/schema";
 import { fetchWithTimeout, USER_AGENT } from "./http";
 
 // github.com paths that are never an org/user we care about.
@@ -96,13 +96,19 @@ export async function resolveGithubOrg(
 }
 
 type Repo = {
+  name?: string;
+  html_url?: string;
   stargazers_count?: number;
+  forks_count?: number;
   language?: string | null;
   pushed_at?: string | null;
   fork?: boolean;
 };
 
-/** Lightweight org metrics: repo count, total stars, primary language, last push. */
+/** How many top repos (by stars) to keep for the clickable list. */
+const TOP_REPOS = 10;
+
+/** Lightweight org metrics: repo count, total stars/forks, primary language, top repos. */
 export async function fetchGithubSignal(
   slug: string,
 ): Promise<GithubSignal | null> {
@@ -122,6 +128,7 @@ export async function fetchGithubSignal(
   const source = owned.length ? owned : repos;
 
   const stars = source.reduce((sum, r) => sum + (r.stargazers_count ?? 0), 0);
+  const forks = source.reduce((sum, r) => sum + (r.forks_count ?? 0), 0);
   const lastPushedAt = source.reduce<string | null>((latest, r) => {
     if (!r.pushed_at) return latest;
     return !latest || r.pushed_at > latest ? r.pushed_at : latest;
@@ -140,12 +147,28 @@ export async function fetchGithubSignal(
     ? Date.now() - new Date(lastPushedAt).getTime() < 30 * 24 * 60 * 60 * 1000
     : false;
 
+  const topRepos: GithubRepo[] = [...source]
+    .sort((a, b) => (b.stargazers_count ?? 0) - (a.stargazers_count ?? 0))
+    .slice(0, TOP_REPOS)
+    .filter((r): r is Repo & { name: string; html_url: string } =>
+      Boolean(r.name && r.html_url),
+    )
+    .map((r) => ({
+      name: r.name,
+      url: r.html_url,
+      stars: r.stargazers_count ?? 0,
+      language: r.language ?? null,
+      pushedAt: r.pushed_at ?? null,
+    }));
+
   return {
     org: slug,
     repoCount: source.length,
     stars,
+    forks,
     primaryLanguage,
     lastPushedAt,
     active,
+    repos: topRepos,
   };
 }

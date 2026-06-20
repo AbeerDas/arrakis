@@ -7,14 +7,20 @@ import {
   ExternalLink,
   LayoutGrid,
   List,
+  Loader2,
   Mail,
+  Plus,
   Search,
 } from "lucide-react";
+import { addToTracker } from "@/app/(app)/tracker/actions";
 import type { FilterOptions, StartupRow } from "@/lib/startups";
+import { Tooltip } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { OutreachModal } from "./outreach-modal";
 import { SignalBadges } from "./signals-ui";
 import { StartupDetail } from "./startup-detail";
+
+type TrackState = "saving" | "done";
 
 type View = "list" | "tile";
 
@@ -205,6 +211,18 @@ export function StartupsExplorer({
   const [outreachCompany, setOutreachCompany] = useState<StartupRow | null>(
     null,
   );
+  // Per-row tracker status, keyed by startup id. addToTracker is idempotent, so
+  // a duplicate just resolves to "done" too.
+  const [tracked, setTracked] = useState<Record<string, TrackState>>({});
+
+  const track = useCallback(async (id: string) => {
+    setTracked((prev) => {
+      if (prev[id]) return prev; // already saving or done
+      return { ...prev, [id]: "saving" };
+    });
+    await addToTracker(id);
+    setTracked((prev) => ({ ...prev, [id]: "done" }));
+  }, []);
 
   const pageRef = useRef(1);
   const reqRef = useRef(0);
@@ -442,24 +460,55 @@ export function StartupsExplorer({
                     {r.batch}
                   </span>
                 ) : null}
-                <button
-                  onClick={() => setOutreachCompany(r)}
-                  aria-label={`Cold outreach for ${r.name}`}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  <Mail className="size-4" />
-                </button>
-                {r.website ? (
-                  <a
-                    href={r.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Visit ${r.name}`}
+                <Tooltip label="Draft a cold outreach email">
+                  <button
+                    onClick={() => setOutreachCompany(r)}
+                    aria-label={`Cold outreach for ${r.name}`}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    <ExternalLink className="size-4" />
-                  </a>
+                    <Mail className="size-4" />
+                  </button>
+                </Tooltip>
+                {r.website ? (
+                  <Tooltip label="Visit website (new tab)">
+                    <a
+                      href={r.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Visit ${r.name}`}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <ExternalLink className="size-4" />
+                    </a>
+                  </Tooltip>
                 ) : null}
+                <Tooltip
+                  label={
+                    tracked[r.id] === "done"
+                      ? "Added to your tracker"
+                      : "Add to tracker"
+                  }
+                >
+                  <button
+                    onClick={() => track(r.id)}
+                    disabled={Boolean(tracked[r.id])}
+                    aria-label={`Add ${r.name} to tracker`}
+                    className={cn(
+                      "transition-colors",
+                      tracked[r.id] === "done"
+                        ? "text-spice"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tracked[r.id] === "done" ? (
+                      <Check className="size-4" />
+                    ) : tracked[r.id] === "saving" ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Plus className="size-4" />
+                    )}
+                  </button>
+                </Tooltip>
               </div>
             </div>
           ))}

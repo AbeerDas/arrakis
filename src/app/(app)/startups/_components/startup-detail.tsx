@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Check, Plus, X } from "lucide-react";
+import { Check, ExternalLink, Mail, Plus, X } from "lucide-react";
 import { addToTracker } from "@/app/(app)/tracker/actions";
 import type { StartupRow } from "@/lib/startups";
 import type { StartupSignals } from "@/lib/signals/types";
@@ -37,7 +37,7 @@ export function StartupDetail({
   const [signals, setSignals] = useState<StartupSignals>(startup.signals);
   const [signalsLoading, setSignalsLoading] = useState(true);
 
-  // The drawer is keyed by startup id (see the explorer), so this runs once per
+  // The modal is keyed by startup id (see the explorer), so this runs once per
   // open with the right cached seed; no synchronous loading reset needed.
   useEffect(() => {
     let active = true;
@@ -67,7 +67,7 @@ export function StartupDetail({
 
   const handleClose = useCallback(() => {
     setVisible(false);
-    setTimeout(onClose, 300);
+    setTimeout(onClose, 200);
   }, [onClose]);
 
   useEffect(() => {
@@ -95,14 +95,17 @@ export function StartupDetail({
     },
     { label: "Location", value: s.location },
   ];
+  const shownFacts = facts.filter((f): f is { label: string; value: string } =>
+    Boolean(f.value),
+  );
 
   return (
-    <div className="fixed inset-0 z-[60]">
+    <div className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto p-4 sm:p-6">
       <button
         aria-label="Close"
         onClick={handleClose}
         className={cn(
-          "bg-foreground/20 absolute inset-0 backdrop-blur-[2px] transition-opacity duration-300",
+          "bg-foreground/20 fixed inset-0 backdrop-blur-[2px] transition-opacity duration-200",
           visible ? "opacity-100" : "opacity-0",
         )}
       />
@@ -111,56 +114,104 @@ export function StartupDetail({
         aria-modal="true"
         aria-label={s.name}
         className={cn(
-          "bg-background absolute inset-y-0 right-0 flex w-full max-w-md flex-col border-l shadow-xl transition-transform duration-300",
-          visible ? "translate-x-0" : "translate-x-full",
+          "bg-background relative my-auto flex max-h-[88vh] w-full max-w-2xl flex-col rounded-2xl border shadow-xl transition-all duration-200",
+          visible ? "scale-100 opacity-100" : "scale-[0.98] opacity-0",
         )}
         style={{ transitionTimingFunction: "var(--ease-dune)" }}
       >
-        <div className="flex items-start justify-between gap-3 border-b p-5">
-          <div className="flex min-w-0 items-center gap-3">
-            {s.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={s.logoUrl}
-                alt=""
-                className="border-border/60 bg-card size-11 shrink-0 rounded-md border object-contain p-1"
-                loading="lazy"
-              />
-            ) : (
-              <span className="bg-foreground/10 flex size-11 shrink-0 items-center justify-center rounded-md text-sm font-medium">
-                {s.name.charAt(0)}
-              </span>
-            )}
-            <div className="min-w-0">
-              <h2 className="truncate text-xl font-semibold tracking-tight">
-                {s.name}
-              </h2>
-              {s.isNew ? (
-                <span className="text-spice text-xs font-medium">New</span>
-              ) : null}
+        {/* header + actions stay pinned; only the body scrolls */}
+        <div className="border-b p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              {s.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={s.logoUrl}
+                  alt=""
+                  className="border-border/60 bg-card size-11 shrink-0 rounded-md border object-contain p-1"
+                  loading="lazy"
+                />
+              ) : (
+                <span className="bg-foreground/10 flex size-11 shrink-0 items-center justify-center rounded-md text-sm font-medium">
+                  {s.name.charAt(0)}
+                </span>
+              )}
+              <div className="min-w-0">
+                <h2 className="truncate text-xl font-semibold tracking-tight">
+                  {s.name}
+                </h2>
+                {s.oneLiner ? (
+                  <p className="text-muted-foreground truncate text-sm">
+                    {s.oneLiner}
+                  </p>
+                ) : s.isNew ? (
+                  <span className="text-spice text-xs font-medium">New</span>
+                ) : null}
+              </div>
             </div>
+            <button
+              onClick={handleClose}
+              aria-label="Close"
+              className="text-muted-foreground hover:text-foreground -m-1 shrink-0 p-1 transition-colors"
+            >
+              <X className="size-5" />
+            </button>
           </div>
-          <button
-            onClick={handleClose}
-            aria-label="Close"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="size-5" />
-          </button>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setOutreachOpen(true)}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-medium transition-colors"
+            >
+              <Mail className="size-4" /> Cold outreach email
+            </button>
+            <button
+              onClick={handleTrack}
+              disabled={trackState !== "idle"}
+              className="border-input hover:bg-accent inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-70"
+            >
+              {trackState === "done" ? (
+                <>
+                  <Check className="size-4" /> Added
+                </>
+              ) : (
+                <>
+                  <Plus className="size-4" />{" "}
+                  {trackState === "saving" ? "Adding…" : "Add to tracker"}
+                </>
+              )}
+            </button>
+            {s.website ? (
+              <a
+                href={s.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-input hover:bg-accent inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors"
+              >
+                <ExternalLink className="size-4" /> Site
+              </a>
+            ) : null}
+            {s.ycUrl ? (
+              <a
+                href={s.ycUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border-input hover:bg-accent inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-medium transition-colors"
+              >
+                View on YC
+              </a>
+            ) : null}
+          </div>
         </div>
 
         <div className="flex-1 space-y-6 overflow-y-auto p-5">
-          {s.oneLiner ? <p className="text-sm">{s.oneLiner}</p> : null}
-
-          <dl className="grid grid-cols-2 gap-4">
-            {facts
-              .filter((f): f is { label: string; value: string } =>
-                Boolean(f.value),
-              )
-              .map((f) => (
+          {shownFacts.length > 0 ? (
+            <dl className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              {shownFacts.map((f) => (
                 <Field key={f.label} label={f.label} value={f.value} />
               ))}
-          </dl>
+            </dl>
+          ) : null}
 
           <SignalsPanel signals={signals} loading={signalsLoading} />
 
@@ -199,58 +250,6 @@ export function StartupDetail({
                   </span>
                 ))}
               </div>
-            </div>
-          ) : null}
-        </div>
-
-        <div className="space-y-2 border-t p-5">
-          <button
-            onClick={() => setOutreachOpen(true)}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
-          >
-            Cold outreach email
-          </button>
-          <button
-            onClick={handleTrack}
-            disabled={trackState !== "idle"}
-            className="border-input hover:bg-accent flex w-full items-center justify-center gap-1.5 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-70"
-          >
-            {trackState === "done" ? (
-              <>
-                <Check className="size-4" /> Added to tracker
-              </>
-            ) : (
-              <>
-                <Plus className="size-4" />{" "}
-                {trackState === "saving" ? "Adding…" : "Add to tracker"}
-              </>
-            )}
-          </button>
-          {s.website || s.ycUrl ? (
-            <div className="flex gap-2">
-              {s.website ? (
-                <a
-                  href={s.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="border-input hover:bg-accent flex-1 rounded-xl border px-4 py-2.5 text-center text-sm font-medium transition-colors"
-                >
-                  Visit site
-                </a>
-              ) : null}
-              {s.ycUrl ? (
-                <a
-                  href={s.ycUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={cn(
-                    "border-input hover:bg-accent rounded-xl border px-4 py-2.5 text-center text-sm font-medium transition-colors",
-                    s.website ? "" : "flex-1",
-                  )}
-                >
-                  View on YC
-                </a>
-              ) : null}
             </div>
           ) : null}
         </div>

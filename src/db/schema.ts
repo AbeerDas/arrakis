@@ -148,13 +148,31 @@ export const startups = pgTable(
 
 // Source-specific jsonb shapes. Schema owns these so it stays self-contained;
 // the enrichment libs in src/lib/signals import them from here.
+export type GithubRepo = {
+  name: string;
+  url: string;
+  stars: number;
+  language: string | null;
+  pushedAt: string | null;
+};
 export type GithubSignal = {
   org: string;
   repoCount: number;
   stars: number;
+  forks: number;
   primaryLanguage: string | null;
   lastPushedAt: string | null;
   active: boolean;
+  // Top owned repos by stars. Optional: older snapshots predate this field.
+  repos?: GithubRepo[];
+};
+export type HackerNewsItem = {
+  title: string;
+  url: string;
+  points: number;
+  comments: number;
+  at: string | null;
+  isLaunch: boolean;
 };
 export type HackerNewsSignal = {
   stories: number;
@@ -163,6 +181,14 @@ export type HackerNewsSignal = {
   latestTitle: string | null;
   latestUrl: string | null;
   latestAt: string | null;
+  // Top stories by points. Optional: older snapshots predate this field.
+  items?: HackerNewsItem[];
+};
+export type NewsItem = {
+  title: string;
+  url: string;
+  source: string | null;
+  at: string | null;
 };
 export type NewsSignal = {
   count: number;
@@ -170,6 +196,8 @@ export type NewsSignal = {
   latestUrl: string | null;
   latestAt: string | null;
   confidence: "high" | "low";
+  // Recent articles, newest first. Optional: older snapshots predate this field.
+  items?: NewsItem[];
 };
 export type SignalPayload = GithubSignal | HackerNewsSignal | NewsSignal;
 

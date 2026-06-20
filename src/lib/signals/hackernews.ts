@@ -1,4 +1,4 @@
-import type { HackerNewsSignal } from "@/db/schema";
+import type { HackerNewsItem, HackerNewsSignal } from "@/db/schema";
 import { fetchWithTimeout, USER_AGENT } from "./http";
 
 type AlgoliaHit = {
@@ -9,6 +9,9 @@ type AlgoliaHit = {
   num_comments?: number | null;
   created_at?: string | null;
 };
+
+/** How many top stories (by points) to keep for the clickable list. */
+const TOP_STORIES = 10;
 
 /** Hacker News story activity for a startup, via the public Algolia API (no key). */
 export async function fetchHnSignal(
@@ -45,6 +48,20 @@ export async function fetchHnSignal(
       (b.created_at ?? "").localeCompare(a.created_at ?? ""),
     )[0];
 
+    const items: HackerNewsItem[] = [...hits]
+      .sort((a, b) => (b.points ?? 0) - (a.points ?? 0))
+      .slice(0, TOP_STORIES)
+      .filter((h): h is AlgoliaHit & { title: string } => Boolean(h.title))
+      .map((h) => ({
+        title: h.title,
+        url: `https://news.ycombinator.com/item?id=${h.objectID}`,
+        points: h.points ?? 0,
+        comments: h.num_comments ?? 0,
+        at: h.created_at ?? null,
+        // "Show HN" / "Launch HN" posts are launch moments worth surfacing.
+        isLaunch: /^(show|launch) hn[:\s]/i.test(h.title),
+      }));
+
     return {
       stories: data.nbHits ?? hits.length,
       points: top.points ?? 0,
@@ -54,6 +71,7 @@ export async function fetchHnSignal(
         ? `https://news.ycombinator.com/item?id=${latest.objectID}`
         : null,
       latestAt: latest.created_at ?? null,
+      items,
     };
   } catch {
     return null;

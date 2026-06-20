@@ -1,14 +1,37 @@
 import { XMLParser } from "fast-xml-parser";
-import type { NewsSignal } from "@/db/schema";
+import type { NewsItem, NewsSignal } from "@/db/schema";
 import { fetchWithTimeout, USER_AGENT } from "./http";
 
 const parser = new XMLParser({ ignoreAttributes: false });
+
+/** How many recent articles to keep for the clickable list. */
+const TOP_ARTICLES = 10;
 
 type RssItem = {
   title?: string;
   link?: string;
   pubDate?: string;
+  // Google News tags each item with its outlet (text + @_url attribute).
+  source?: string | { "#text"?: string } | null;
 };
+
+/** "Headline - The Verge" -> { title: "Headline", source: "The Verge" }. */
+function splitTitle(raw: string, fallbackSource: string | null) {
+  const idx = raw.lastIndexOf(" - ");
+  if (idx > 0 && idx > raw.length - 60) {
+    return {
+      title: raw.slice(0, idx).trim(),
+      source: raw.slice(idx + 3).trim(),
+    };
+  }
+  return { title: raw.trim(), source: fallbackSource };
+}
+
+function readSource(s: RssItem["source"]): string | null {
+  if (!s) return null;
+  if (typeof s === "string") return s.trim() || null;
+  return s["#text"]?.trim() || null;
+}
 
 /**
  * Name distinctiveness drives confidence. Only short single-word names that look
@@ -40,10 +63,10 @@ export async function fetchNewsSignal(
     };
 
     const raw = parsed.rss?.channel?.item;
-    const items: RssItem[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
+    const rssItems: RssItem[] = Array.isArray(raw) ? raw : raw ? [raw] : [];
     const confidence = nameConfidence(name);
 
-    if (items.length === 0) {
+    if (rssItems.length === 0) {
       return {
         count: 0,
         latestTitle: null,
@@ -54,13 +77,24 @@ export async function fetchNewsSignal(
     }
 
     // Google News RSS returns items newest-first.
-    const latest = items[0];
+    const articles: NewsItem[] = rssItems
+      .filter((it): it is RssItem & { title: string; link: string } =>
+        Boolean(it.title && it.link),
+      )
+      .slice(0, TOP_ARTICLES)
+      .map((it) => {
+        const { title, source } = splitTitle(it.title, readSource(it.source));
+        return { title, url: it.link, source, at: it.pubDate ?? null };
+      });
+
+    const latest = articles[0] ?? null;
     return {
-      count: items.length,
-      latestTitle: latest.title ?? null,
-      latestUrl: latest.link ?? null,
-      latestAt: latest.pubDate ?? null,
+      count: rssItems.length,
+      latestTitle: latest?.title ?? null,
+      latestUrl: latest?.url ?? null,
+      latestAt: latest?.at ?? null,
       confidence,
+      items: articles,
     };
   } catch {
     return null;

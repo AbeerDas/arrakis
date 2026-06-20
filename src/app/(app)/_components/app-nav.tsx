@@ -14,29 +14,29 @@ const linkClass =
 export function AppNav({ isAdmin }: { isAdmin: boolean }) {
   return (
     <header className="sticky top-0 z-50 px-4 pt-4">
-      <div className="glass mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-2xl px-4 shadow-sm sm:px-5">
-        <div className="flex items-center gap-6">
-          <Link href="/startups" className="flex items-center gap-2">
-            <ArrakisLogo className="h-7 w-auto shrink-0" />
-            <span className="text-lg font-semibold tracking-tight sm:text-xl">
-              Arrakis
-            </span>
-          </Link>
-          <nav className="flex items-center gap-5">
-            {NAV.map((n) => (
-              <Link key={n.href} href={n.href} className={linkClass}>
-                {n.label}
-              </Link>
-            ))}
-            {isAdmin ? (
-              <Link href="/admin" className={linkClass}>
-                Admin
-              </Link>
-            ) : null}
-          </nav>
-        </div>
+      <div className="glass-nav mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-2 rounded-2xl px-4 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:px-5">
+        <Link
+          href="/startups"
+          className="flex items-baseline gap-2 justify-self-start text-lg sm:text-xl"
+        >
+          <ArrakisLogo className="h-[0.78em] w-auto shrink-0" />
+          <span className="font-semibold tracking-tight">Arrakis</span>
+        </Link>
 
-        <div className="flex items-center gap-5">
+        <nav className="flex items-center gap-4 justify-self-center sm:gap-6">
+          {NAV.map((n) => (
+            <Link key={n.href} href={n.href} className={linkClass}>
+              {n.label}
+            </Link>
+          ))}
+          {isAdmin ? (
+            <Link href="/admin" className={linkClass}>
+              Admin
+            </Link>
+          ) : null}
+        </nav>
+
+        <div className="flex items-center gap-5 justify-self-end">
           <Link
             href="/settings"
             aria-label="Settings"
