@@ -201,49 +201,83 @@ function EntryCard({
 
       {expanded ? (
         <div className="border-t p-3 sm:grid sm:grid-cols-2 sm:gap-4">
-          <NotesField entry={entry} />
-          <SentEmailField entry={entry} />
+          <AutosaveField
+            label="Notes"
+            placeholder="Private notes for this startup."
+            initial={entry.notes ?? ""}
+            onSave={(v) => updateNotes(entry.id, v)}
+          />
+          <AutosaveField
+            label="Email you sent"
+            placeholder="Paste the email you sent, for your own records."
+            initial={entry.sentEmailBody ?? ""}
+            onSave={(v) => updateSentEmail(entry.id, v)}
+            className="mt-3 sm:mt-0"
+          />
         </div>
       ) : null}
     </div>
   );
 }
 
-function NotesField({ entry }: { entry: TrackerEntryRow }) {
-  const [value, setValue] = useState(entry.notes ?? "");
-  return (
-    <div className="space-y-1.5">
-      <label className="text-muted-foreground text-xs font-medium">Notes</label>
-      <textarea
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={() => {
-          if (value !== (entry.notes ?? "")) void updateNotes(entry.id, value);
-        }}
-        rows={4}
-        placeholder="Private notes for this startup."
-        className="border-input bg-background w-full resize-none rounded-lg border px-3 py-2 text-sm"
-      />
-    </div>
-  );
-}
+/** Textarea that autosaves ~700ms after typing stops, with a Saving/Saved tag. */
+function AutosaveField({
+  label,
+  placeholder,
+  initial,
+  onSave,
+  className,
+}: {
+  label: string;
+  placeholder: string;
+  initial: string;
+  onSave: (value: string) => Promise<void>;
+  className?: string;
+}) {
+  const [value, setValue] = useState(initial);
+  const [status, setStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const savedValue = useRef(initial);
 
-function SentEmailField({ entry }: { entry: TrackerEntryRow }) {
-  const [value, setValue] = useState(entry.sentEmailBody ?? "");
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const onChange = (next: string) => {
+    setValue(next);
+    setStatus("idle");
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      if (next === savedValue.current) return;
+      setStatus("saving");
+      await onSave(next);
+      savedValue.current = next;
+      setStatus("saved");
+    }, 700);
+  };
+
   return (
-    <div className="mt-3 space-y-1.5 sm:mt-0">
-      <label className="text-muted-foreground text-xs font-medium">
-        Email you sent
-      </label>
+    <div className={cn("space-y-1.5", className)}>
+      <div className="flex items-center justify-between">
+        <label className="text-muted-foreground text-xs font-medium">
+          {label}
+        </label>
+        {status === "saving" ? (
+          <span className="text-muted-foreground text-xs">Saving…</span>
+        ) : status === "saved" ? (
+          <span className="text-spice flex items-center gap-1 text-xs">
+            <Check className="size-3" /> Saved
+          </span>
+        ) : null}
+      </div>
       <textarea
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onBlur={() => {
-          if (value !== (entry.sentEmailBody ?? ""))
-            void updateSentEmail(entry.id, value);
-        }}
+        onChange={(e) => onChange(e.target.value)}
         rows={4}
-        placeholder="Paste the email you sent, for your own records."
+        placeholder={placeholder}
         className="border-input bg-background w-full resize-none rounded-lg border px-3 py-2 text-sm"
       />
     </div>

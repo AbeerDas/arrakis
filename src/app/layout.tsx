@@ -21,11 +21,14 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "Arrakis — find startups before they post jobs",
+    default: "Arrakis · out-apply everyone",
     template: "%s · Arrakis",
   },
   description:
-    "Discover early-stage startups, reach founders with a resume-backed cold email, and track every application in one place.",
+    "Find the startups worth applying to, reach their founders with a resume-backed email that sounds like you, and track every application in one place.",
+  icons: {
+    icon: "/arrakis.svg",
+  },
 };
 
 export default function RootLayout({

@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/refresh-yc",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/refresh-signals",
+      "schedule": "30 8 * * *"
     }
   ]
 }

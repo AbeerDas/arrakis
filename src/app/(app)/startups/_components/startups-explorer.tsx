@@ -13,6 +13,7 @@ import {
 import type { FilterOptions, StartupRow } from "@/lib/startups";
 import { cn } from "@/lib/utils";
 import { OutreachModal } from "./outreach-modal";
+import { SignalBadges } from "./signals-ui";
 import { StartupDetail } from "./startup-detail";
 
 type View = "list" | "tile";
@@ -430,13 +431,14 @@ export function StartupsExplorer({
                       {r.oneLiner}
                     </p>
                   ) : null}
+                  <SignalBadges signals={r.signals} className="mt-1" />
                 </div>
               </button>
 
               {/* right: batch on the left, actions pushed to the outside */}
               <div className="hidden shrink-0 items-center gap-3 sm:flex">
                 {r.batch ? (
-                  <span className="text-muted-foreground w-10 text-right text-xs">
+                  <span className="text-muted-foreground shrink-0 text-right text-xs whitespace-nowrap">
                     {r.batch}
                   </span>
                 ) : null}
@@ -498,6 +500,7 @@ export function StartupsExplorer({
                   </span>
                 ) : null}
               </div>
+              <SignalBadges signals={r.signals} className="mt-2" />
             </button>
           ))}
         </div>
@@ -511,7 +514,11 @@ export function StartupsExplorer({
       <div ref={sentinelRef} className="h-px" />
 
       {selected ? (
-        <StartupDetail startup={selected} onClose={() => setSelected(null)} />
+        <StartupDetail
+          key={selected.id}
+          startup={selected}
+          onClose={() => setSelected(null)}
+        />
       ) : null}
 
       {outreachCompany ? (

@@ -4,7 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 import { Check, Plus, X } from "lucide-react";
 import { addToTracker } from "@/app/(app)/tracker/actions";
 import type { StartupRow } from "@/lib/startups";
+import type { StartupSignals } from "@/lib/signals/types";
 import { cn } from "@/lib/utils";
+import { getStartupSignals } from "../actions";
+import { SignalsPanel } from "./signals-ui";
 import { OutreachModal } from "./outreach-modal";
 
 function Field({ label, value }: { label: string; value: string }) {
@@ -30,6 +33,25 @@ export function StartupDetail({
   const [trackState, setTrackState] = useState<"idle" | "saving" | "done">(
     "idle",
   );
+  // Seed from the cached signals already on the row, then refresh on open.
+  const [signals, setSignals] = useState<StartupSignals>(startup.signals);
+  const [signalsLoading, setSignalsLoading] = useState(true);
+
+  // The drawer is keyed by startup id (see the explorer), so this runs once per
+  // open with the right cached seed; no synchronous loading reset needed.
+  useEffect(() => {
+    let active = true;
+    getStartupSignals(startup.id)
+      .then((s) => {
+        if (active) setSignals(s);
+      })
+      .finally(() => {
+        if (active) setSignalsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [startup.id]);
 
   const handleTrack = async () => {
     if (trackState !== "idle") return;
@@ -139,6 +161,8 @@ export function StartupDetail({
                 <Field key={f.label} label={f.label} value={f.value} />
               ))}
           </dl>
+
+          <SignalsPanel signals={signals} loading={signalsLoading} />
 
           {s.description ? (
             <div>

@@ -1,9 +1,9 @@
 # Arrakis
 
-A startup discovery, cold-outreach, and application-tracking platform for job
-seekers. Find early-stage startups before they post jobs, reach founders with a
-resume-backed AI email, and track every application — with a paid tier for
-manually verified founder contacts.
+A startup-application platform for job seekers. Find the early-stage startups
+worth your shot, reach their founders with a resume-backed AI email that sounds
+like you, and track every application in one place. A paid tier unlocks manually
+verified founder contacts.
 
 > **Status:** scaffold. Auth, the database schema, and the deploy/cron pipeline
 > are in place. Product features (tracker UI, email generator, paid gating,
@@ -59,16 +59,16 @@ sign-in.
 
 ## Scripts
 
-| Script | Purpose |
-| --- | --- |
-| `pnpm dev` | Run the dev server |
-| `pnpm build` / `pnpm start` | Production build / serve |
-| `pnpm lint` / `pnpm typecheck` | ESLint / `tsc --noEmit` |
-| `pnpm db:generate` | Generate a migration from `src/db/schema.ts` (offline) |
-| `pnpm db:migrate` | Apply migrations (needs `DIRECT_URL`) |
-| `pnpm db:push` | Push schema without a migration (dev only) |
-| `pnpm db:studio` | Drizzle Studio |
-| `pnpm db:seed` | Seed default tracker stages |
+| Script                         | Purpose                                                |
+| ------------------------------ | ------------------------------------------------------ |
+| `pnpm dev`                     | Run the dev server                                     |
+| `pnpm build` / `pnpm start`    | Production build / serve                               |
+| `pnpm lint` / `pnpm typecheck` | ESLint / `tsc --noEmit`                                |
+| `pnpm db:generate`             | Generate a migration from `src/db/schema.ts` (offline) |
+| `pnpm db:migrate`              | Apply migrations (needs `DIRECT_URL`)                  |
+| `pnpm db:push`                 | Push schema without a migration (dev only)             |
+| `pnpm db:studio`               | Drizzle Studio                                         |
+| `pnpm db:seed`                 | Seed default tracker stages                            |
 
 ## Deploy (Vercel)
 
@@ -99,7 +99,7 @@ src/
 
 YC data comes from [yc-oss/api](https://github.com/yc-oss/api), an open,
 daily-updating mirror — we do **not** scrape ycombinator.com (or Wellfound /
-Crunchbase / Techstars), all of which prohibit it. Founder *emails* are never in
+Crunchbase / Techstars), all of which prohibit it. Founder _emails_ are never in
 any open dataset; verified contacts are added manually. See the PRD §5.1a.
 
 ## Privacy hard lines (do not cross without an explicit product decision)

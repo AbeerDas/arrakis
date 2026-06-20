@@ -71,7 +71,7 @@ type CompanyContext = {
 };
 
 const STYLE_RULES = `STYLE (follow these exactly):
-- Before writing, research the company and its founders. The founder names are usually NOT provided below, so find them yourself from the YC profile link and the company website, then address the email to the right person. While researching, dig up concrete, specific, non-obvious details: a recent launch, a technical blog post, a funding milestone, something a founder wrote or said publicly, an unusual approach. One genuinely specific detail is worth more than ten generic observations.
+- Before writing, research the company and its founders. The founder names are usually NOT provided below, so find them yourself from the YC profile link and the company website, then address the email to the right person. Also try to find the founders' email addresses (usually firstname@companyname or available on the YC profile, LinkedIn, or company website footer). Use the most specific founder email you can find for this email. While researching, dig up concrete, specific, non-obvious details: a recent launch, a technical blog post, a funding milestone, something a founder wrote or said publicly, an unusual approach. One genuinely specific detail is worth more than ten generic observations.
 - Sound like a real person wrote it. Casual, warm, conversational. Never like an AI.
 - Concise and punchy. Short, minimal sentences. Cut every filler word.
 - Read it back as a natural, flowing conversation turned into a short email.

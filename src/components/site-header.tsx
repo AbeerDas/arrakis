@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { ArrakisLogo } from "@/components/arrakis-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -9,14 +9,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-50 px-4 pt-4">
       <div className="glass mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-2xl px-4 shadow-sm sm:px-5">
         <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/arrakis-mark.png"
-            alt=""
-            width={36}
-            height={36}
-            className="h-9 w-9 shrink-0 object-contain mix-blend-multiply"
-            priority
-          />
+          <ArrakisLogo className="h-7 w-auto shrink-0" />
           <span className="text-lg font-semibold tracking-tight sm:text-xl">
             Arrakis
           </span>

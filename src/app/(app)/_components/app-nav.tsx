@@ -1,7 +1,6 @@
 import { Settings } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { signOut } from "@/app/(auth)/actions";
+import { ArrakisLogo } from "@/components/arrakis-logo";
 
 const NAV = [
   { href: "/outreach", label: "Outreach" },
@@ -18,14 +17,7 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
       <div className="glass mx-auto flex h-14 w-full max-w-6xl items-center justify-between rounded-2xl px-4 shadow-sm sm:px-5">
         <div className="flex items-center gap-6">
           <Link href="/startups" className="flex items-center gap-2">
-            <Image
-              src="/arrakis-mark.png"
-              alt=""
-              width={36}
-              height={36}
-              className="h-9 w-9 shrink-0 object-contain mix-blend-multiply"
-              priority
-            />
+            <ArrakisLogo className="h-7 w-auto shrink-0" />
             <span className="text-lg font-semibold tracking-tight sm:text-xl">
               Arrakis
             </span>
@@ -53,11 +45,6 @@ export function AppNav({ isAdmin }: { isAdmin: boolean }) {
           >
             <Settings className="size-5" />
           </Link>
-          <form action={signOut}>
-            <button type="submit" className={linkClass}>
-              Sign out
-            </button>
-          </form>
         </div>
       </div>
     </header>

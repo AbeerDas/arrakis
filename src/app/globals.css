@@ -130,11 +130,12 @@
    Utilities — liquid glass + motion. Documented in docs/design.md.
 --------------------------------------------------------------------------- */
 @layer utilities {
-  /* Frosted translucent surface ("liquid glass"). */
+  /* Frosted translucent surface ("liquid glass"). Nearly opaque so it reads as
+     solid frosted glass with subtle backdrop blur visible. */
   .glass {
-    background: color-mix(in oklch, var(--card) 62%, transparent);
-    backdrop-filter: blur(18px) saturate(150%);
-    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    background: color-mix(in oklch, var(--card) 96%, transparent);
+    backdrop-filter: blur(24px) saturate(150%);
+    -webkit-backdrop-filter: blur(24px) saturate(150%);
     border: 1px solid color-mix(in oklch, var(--foreground) 9%, transparent);
   }
   .glass-soft {

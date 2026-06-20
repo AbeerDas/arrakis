@@ -1,6 +1,8 @@
 import { and, asc, count, desc, eq, ilike, or, sql } from "drizzle-orm";
 import { getDb } from "@/db";
 import { startups } from "@/db/schema";
+import { getLatestSignalsForStartups } from "@/lib/signals/read";
+import { EMPTY_SIGNALS, type StartupSignals } from "@/lib/signals/types";
 
 export const STARTUPS_PAGE_SIZE = 40;
 
@@ -24,6 +26,8 @@ export type StartupRow = {
   founderNames: string[];
   isNew: boolean;
   isHiring: boolean;
+  // Latest cached signals (empty until enriched on view or by the nightly cron).
+  signals: StartupSignals;
 };
 
 export type StartupFilters = {
@@ -116,7 +120,18 @@ export async function queryStartups(
     db.select({ total: count() }).from(startups).where(where),
   ]);
 
-  return { rows, total, hasMore: page * STARTUPS_PAGE_SIZE < total };
+  // Attach cached signals for just this page's rows (one extra query).
+  const signalsById = await getLatestSignalsForStartups(rows.map((r) => r.id));
+  const withSignals: StartupRow[] = rows.map((r) => ({
+    ...r,
+    signals: signalsById.get(r.id) ?? EMPTY_SIGNALS,
+  }));
+
+  return {
+    rows: withSignals,
+    total,
+    hasMore: page * STARTUPS_PAGE_SIZE < total,
+  };
 }
 
 export async function getFilterOptions(): Promise<FilterOptions> {

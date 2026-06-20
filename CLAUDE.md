@@ -2,9 +2,14 @@
 
 # Arrakis — project guide
 
-Job/internship outreach platform: discover early-stage startups, send
-resume-backed cold emails, track applications, with a paid tier for manually
-verified founder contacts and an admin-only anonymized moat dashboard.
+A startup-application platform for job seekers (interns, new grads). The thesis:
+give an applicant the best possible shot at standing out. Two gateways do the
+work. First, a curated, signal-enriched dataset to find and rank the startups
+actually worth applying to (the data moat). Second, a personalized outreach
+pipeline that turns a resume into a sharp, founder-specific cold email. Plus
+private application tracking, a paid tier for manually verified founder contacts,
+and an admin-only anonymized moat dashboard. It is NOT about beating the market
+to roles before they are posted; it is about applying smarter and landing more.
 
 ## Decided stack & conventions
 

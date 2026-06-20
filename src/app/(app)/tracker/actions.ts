@@ -200,15 +200,19 @@ export async function searchStartupsToAdd(
   const clean = q.trim();
   if (clean.length < 2) return [];
   const db = getDb();
-  const tracked = db
-    .select({ s: trackerEntries.startupId })
+  const trackedIds = await db
+    .select({ id: trackerEntries.startupId })
     .from(trackerEntries)
     .where(eq(trackerEntries.userId, user.id));
+  const excludeIds = trackedIds.map((r) => r.id);
   return db
     .select({ id: startups.id, name: startups.name, batch: startups.batch })
     .from(startups)
     .where(
-      and(ilike(startups.name, `%${clean}%`), notInArray(startups.id, tracked)),
+      and(
+        ilike(startups.name, `%${clean}%`),
+        excludeIds.length ? notInArray(startups.id, excludeIds) : undefined,
+      ),
     )
     .orderBy(asc(startups.name))
     .limit(8);

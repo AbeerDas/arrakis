@@ -50,6 +50,13 @@ export const paymentStatus = pgEnum("payment_status", [
   "refunded",
 ]);
 
+/** Source of an enriched startup signal snapshot (see `startup_signals`). */
+export const signalSource = pgEnum("signal_source", [
+  "github",
+  "hackernews",
+  "news",
+]);
+
 const createdAt = () =>
   timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 const updatedAt = () =>
@@ -115,6 +122,10 @@ export const startups = pgTable(
     externalId: text("external_id"),
     // Raw source payload, retained to diff future refreshes against.
     sourceData: jsonb("source_data"),
+    // Resolved GitHub org URL for activity signals. Null with a non-null
+    // githubResolvedAt means "we looked and found none" (negative cache).
+    githubUrl: text("github_url"),
+    githubResolvedAt: timestamp("github_resolved_at", { withTimezone: true }),
     firstSeenAt: timestamp("first_seen_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -128,6 +139,62 @@ export const startups = pgTable(
     index("startups_stage_idx").on(t.stage),
     index("startups_team_size_idx").on(t.teamSize),
     index("startups_first_seen_at_idx").on(t.firstSeenAt),
+  ],
+);
+
+// ---------------------------------------------------------------------------
+// startup_signals — time-series enrichment snapshots
+// ---------------------------------------------------------------------------
+
+// Source-specific jsonb shapes. Schema owns these so it stays self-contained;
+// the enrichment libs in src/lib/signals import them from here.
+export type GithubSignal = {
+  org: string;
+  repoCount: number;
+  stars: number;
+  primaryLanguage: string | null;
+  lastPushedAt: string | null;
+  active: boolean;
+};
+export type HackerNewsSignal = {
+  stories: number;
+  points: number;
+  comments: number;
+  latestTitle: string | null;
+  latestUrl: string | null;
+  latestAt: string | null;
+};
+export type NewsSignal = {
+  count: number;
+  latestTitle: string | null;
+  latestUrl: string | null;
+  latestAt: string | null;
+  confidence: "high" | "low";
+};
+export type SignalPayload = GithubSignal | HackerNewsSignal | NewsSignal;
+
+// Append-only: one row per (startup, source) per enrichment run. Latest is read
+// with DISTINCT ON (startup_id, source) ORDER BY captured_at DESC. Public-company
+// data only, never user data. RLS default-deny is enabled in the migration.
+export const startupSignals = pgTable(
+  "startup_signals",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    startupId: uuid("startup_id")
+      .notNull()
+      .references(() => startups.id, { onDelete: "cascade" }),
+    source: signalSource("source").notNull(),
+    payload: jsonb("payload").$type<SignalPayload>().notNull(),
+    capturedAt: timestamp("captured_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("startup_signals_latest_idx").on(
+      t.startupId,
+      t.source,
+      t.capturedAt.desc(),
+    ),
   ],
 );
 
@@ -341,6 +408,14 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
 export const startupsRelations = relations(startups, ({ many }) => ({
   contacts: many(contacts),
   trackerEntries: many(trackerEntries),
+  signals: many(startupSignals),
+}));
+
+export const startupSignalsRelations = relations(startupSignals, ({ one }) => ({
+  startup: one(startups, {
+    fields: [startupSignals.startupId],
+    references: [startups.id],
+  }),
 }));
 
 export const contactsRelations = relations(contacts, ({ one }) => ({
@@ -386,6 +461,8 @@ export const trackerEntryStagesRelations = relations(
 export type Profile = typeof profiles.$inferSelect;
 export type Startup = typeof startups.$inferSelect;
 export type NewStartup = typeof startups.$inferInsert;
+export type StartupSignal = typeof startupSignals.$inferSelect;
+export type NewStartupSignal = typeof startupSignals.$inferInsert;
 export type Contact = typeof contacts.$inferSelect;
 export type Resume = typeof resumes.$inferSelect;
 export type RoleProfile = typeof roleProfiles.$inferSelect;

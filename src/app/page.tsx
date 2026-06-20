@@ -14,16 +14,16 @@ export default function LandingPage() {
       {/* full-bleed desert scenery, faded into the soft white, behind the hero */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[135vh] overflow-hidden"
+        className="pointer-events-none absolute -inset-x-[10%] top-0 -z-10 h-[150vh] overflow-hidden"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/desert.jpg"
           alt=""
-          className="absolute inset-0 h-full w-full scale-[1.45] object-cover object-[center_72%] opacity-[0.38]"
+          className="absolute inset-0 h-full w-full scale-[1.15] object-cover object-[center_62%] opacity-[0.6]"
         />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,var(--background)_0%,transparent_38%,transparent_62%,var(--background)_90%)]" />
-        <div className="absolute inset-x-0 top-0 h-[135vh] bg-[radial-gradient(55%_40%_at_50%_6%,color-mix(in_oklch,var(--spice)_8%,transparent),transparent)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,var(--background)_0%,transparent_14%,transparent_72%,var(--background)_95%)]" />
+        <div className="absolute inset-x-0 top-0 h-[150vh] bg-[radial-gradient(55%_40%_at_50%_6%,color-mix(in_oklch,var(--spice)_8%,transparent),transparent)]" />
       </div>
 
       <SiteHeader />
@@ -33,16 +33,16 @@ export default function LandingPage() {
         <section className="mx-auto w-full max-w-6xl overflow-hidden px-6 pt-32 pb-0 text-center sm:pt-40">
           <Reveal>
             <p className="text-spice text-xs font-bold tracking-[0.28em] uppercase">
-              Move first · the rest follow
+              Apply sharper, land faster
             </p>
           </Reveal>
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl md:text-6xl">
-            <LetterReveal text="Find startups before they know they’re hiring." />
+            <LetterReveal text="Out-apply everyone." />
           </h1>
           <Reveal delayMs={700}>
             <p className="text-muted-foreground mx-auto mt-7 max-w-md text-lg leading-relaxed">
-              See new companies the day they appear, and reach the right founder
-              before the role is ever posted.
+              Find the startups worth your shot, then reach the founder with an
+              email that sounds like you, not a template.
             </p>
           </Reveal>
           <Reveal delayMs={820}>
@@ -82,8 +82,8 @@ export default function LandingPage() {
         <section className="mx-auto w-full max-w-6xl space-y-48 px-6 py-24">
           <FeatureRow
             eyebrow="Discover"
-            title="Every early-stage startup, the day it appears."
-            body="Browse a clean, nightly-refreshed list and filter to exactly what fits."
+            title="Find the startups actually worth applying to."
+            body="Browse a clean, curated list and filter to the companies that fit you, so your energy goes where it counts."
           >
             <DatabaseMock />
           </FeatureRow>
@@ -164,7 +164,7 @@ export default function LandingPage() {
               />
               <div className="relative">
                 <h2 className="mx-auto max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">
-                  Be the first name in the inbox.
+                  Be the one they remember.
                 </h2>
                 <p className="text-muted-foreground mx-auto mt-5 max-w-lg">
                   Start free. Find the companies, reach the founders, keep every
@@ -260,7 +260,7 @@ function FeatureRow({
 const STEPS = [
   {
     title: "Discover",
-    body: "New since your last visit, in the roles and stages you want.",
+    body: "The startups worth your time, filtered to the roles and stages you want.",
   },
   {
     title: "Reach",
